@@ -60,13 +60,54 @@ namespace SpaceBlog.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
             ReturnUrl = returnUrl;
+            
+            // Убеждаемся, что Input инициализирован
+            if (Input == null)
+            {
+                Input = new InputModel();
+                _logger.LogInformation("Input модель была инициализирована в OnGet логина");
+            }
         }
 
         public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
         {
+            _logger.LogInformation("=== НАЧАЛО POST ЛОГИНА ===");
+            _logger.LogInformation("Input is null: {IsNull}", Input == null);
+            _logger.LogInformation("Input.Email: '{Email}'", Input?.Email ?? "NULL");
+            
+            // Логируем данные формы
+            _logger.LogInformation("=== ДАННЫЕ ФОРМЫ ЛОГИНА ===");
+            foreach (var key in Request.Form.Keys)
+            {
+                _logger.LogInformation("Form[{Key}] = '{Value}'", key, Request.Form[key]);
+            }
+            
             returnUrl ??= Url.Content("~/");
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
+            // Проверяем Input на null и инициализируем при необходимости
+            if (Input == null)
+            {
+                _logger.LogError("Input модель была null, инициализируем новую");
+                Input = new InputModel();
+                
+                // Попробуем заполнить из данных формы вручную
+                if (Request.Form.ContainsKey("Input.Email"))
+                {
+                    Input.Email = Request.Form["Input.Email"];
+                    Input.Password = Request.Form["Input.Password"];
+                    Input.RememberMe = Request.Form["Input.RememberMe"].ToString().Contains("true");
+                    
+                    _logger.LogInformation("Данные восстановлены из формы: Email={Email}", Input.Email);
+                }
+                else
+                {
+                    _logger.LogError("Данные формы не найдены");
+                    ModelState.AddModelError(string.Empty, "Ошибка обработки формы. Пожалуйста, попробуйте снова.");
+                    return Page();
+                }
+            }
 
             if (ModelState.IsValid)
             {
