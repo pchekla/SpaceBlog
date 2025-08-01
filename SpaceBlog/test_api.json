@@ -1,0 +1,61 @@
+{
+  "baseUrl": "https://localhost:5001/api",
+  "testUsers": {
+    "admin": {
+      "email": "admin@spaceblog.com",
+      "password": "Admin123!",
+      "expectedRole": "Administrator"
+    },
+    "moderator": {
+      "email": "moderator@spaceblog.com", 
+      "password": "Moderator123!",
+      "expectedRole": "Moderator"
+    },
+    "user": {
+      "email": "user@spaceblog.com",
+      "password": "User123!",
+      "expectedRole": "User"
+    }
+  },
+  "testScenarios": [
+    {
+      "name": "1. Проверить роли",
+      "method": "GET",
+      "url": "/Auth/roles",
+      "description": "Должен вернуть 4 роли: User, Author, Moderator, Administrator"
+    },
+    {
+      "name": "2. Войти как администратор",
+      "method": "POST", 
+      "url": "/Auth/login",
+      "body": {
+        "Email": "admin@spaceblog.com",
+        "Password": "Admin123!"
+      },
+      "description": "Должен вернуть Success=true с ролью Administrator"
+    },
+    {
+      "name": "3. Войти как обычный пользователь",
+      "method": "POST",
+      "url": "/Auth/login", 
+      "body": {
+        "Email": "user@spaceblog.com",
+        "Password": "User123!"
+      },
+      "description": "Должен вернуть Success=true с ролью User"
+    },
+    {
+      "name": "4. Попробовать удалить пользователя БЕЗ авторизации",
+      "method": "DELETE",
+      "url": "/BlogUsers/{user-id}",
+      "description": "Должен вернуть 401 Unauthorized"
+    },
+    {
+      "name": "5. Войти как админ и удалить пользователя",
+      "method": "DELETE",
+      "url": "/BlogUsers/{user-id}",
+      "description": "После входа как админ - должен успешно удалить",
+      "requiresAuth": "Administrator"
+    }
+  ]
+}
