@@ -68,15 +68,80 @@ namespace SpaceBlog.Areas.Identity.Pages.Account
         {
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            
+            // Убеждаемся, что Input инициализирован
+            if (Input == null)
+            {
+                Input = new InputModel();
+                _logger.LogInformation("Input модель была инициализирована в OnGet");
+            }
         }
 
         public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
         {
-            returnUrl ??= Url.Content("~/");
-            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-
-            if (ModelState.IsValid)
+            try
             {
+                _logger.LogInformation("=== НАЧАЛО POST ЗАПРОСА ===");
+                _logger.LogInformation("Input is null: {IsNull}", Input == null);
+                _logger.LogInformation("Input.Email: '{Email}'", Input?.Email ?? "NULL");
+                _logger.LogInformation("Input.FirstName: '{FirstName}'", Input?.FirstName ?? "NULL");
+                _logger.LogInformation("Input.LastName: '{LastName}'", Input?.LastName ?? "NULL");
+                
+                // Логируем данные формы
+                _logger.LogInformation("=== ДАННЫЕ ФОРМЫ ===");
+                foreach (var key in Request.Form.Keys)
+                {
+                    _logger.LogInformation("Form[{Key}] = '{Value}'", key, Request.Form[key]);
+                }
+                
+                returnUrl ??= Url.Content("~/");
+                ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
+                // Проверяем Input на null и инициализируем при необходимости
+                if (Input == null)
+                {
+                    _logger.LogError("Input модель была null, инициализируем новую");
+                    Input = new InputModel();
+                    
+                    if (Request.Form.ContainsKey("Input.Email"))
+                    {
+                        Input.Email = Request.Form["Input.Email"];
+                        Input.FirstName = Request.Form["Input.FirstName"];
+                        Input.LastName = Request.Form["Input.LastName"];
+                        Input.Password = Request.Form["Input.Password"];
+                        Input.ConfirmPassword = Request.Form["Input.ConfirmPassword"];
+                        
+                        _logger.LogInformation("Данные восстановлены из формы: Email={Email}, FirstName={FirstName}", 
+                            Input.Email, Input.FirstName);
+                    }
+                    else
+                    {
+                        _logger.LogError("Данные формы не найдены");
+                        ModelState.AddModelError(string.Empty, "Ошибка обработки формы. Пожалуйста, попробуйте снова.");
+                        return Page();
+                    }
+                }
+
+                // Проверяем валидность модели
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning("Модель не прошла валидацию. Ошибки: {Errors}", 
+                        string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
+                    return Page();
+                }
+
+                _logger.LogInformation("Модель прошла валидацию для email: {Email}", Input.Email);
+
+                // Проверяем, не существует ли уже пользователь с таким email
+                var existingUser = await _userManager.FindByEmailAsync(Input.Email);
+                if (existingUser != null)
+                {
+                    _logger.LogWarning("Попытка регистрации с уже существующим email: {Email}", Input.Email);
+                    ModelState.AddModelError(string.Empty, "Пользователь с таким email уже существует");
+                    return Page();
+                }
+
+                _logger.LogInformation("Email свободен, создаём пользователя: {Email}", Input.Email);
                 var user = CreateUser();
 
                 // Заполняем дополнительные поля BlogUser
@@ -87,33 +152,55 @@ namespace SpaceBlog.Areas.Identity.Pages.Account
                 user.EmailNotifications = true;
                 user.IsPublicProfile = true;
 
+                _logger.LogInformation("Настройка пользователя: {Email}", Input.Email);
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 
+                _logger.LogInformation("Создание пользователя в базе данных: {Email}", Input.Email);
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("Пользователь создал новый аккаунт с паролем.");
+                    _logger.LogInformation("Пользователь {Email} успешно создан", Input.Email);
 
-                    // Назначаем базовую роль "User"
-                    await _userManager.AddToRoleAsync(user, Role.Names.User);
-                    _logger.LogInformation("Пользователю {Email} назначена роль User", Input.Email);
+                    try
+                    {
+                        // Назначаем базовую роль "User"
+                        await _userManager.AddToRoleAsync(user, Role.Names.User);
+                        _logger.LogInformation("Пользователю {Email} назначена роль User", Input.Email);
 
-                    // Автоматический вход после регистрации
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    _logger.LogInformation("Пользователь {Email} автоматически вошел в систему после регистрации", Input.Email);
+                        // Автоматический вход после регистрации
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        _logger.LogInformation("Пользователь {Email} автоматически вошел в систему после регистрации", Input.Email);
 
-                    return LocalRedirect(returnUrl);
+                        return LocalRedirect(returnUrl);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Ошибка при назначении роли или входе для пользователя {Email}", Input.Email);
+                        ModelState.AddModelError(string.Empty, "Ошибка при завершении регистрации. Обратитесь к администратору.");
+                        return Page();
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("Ошибка создания пользователя {Email}. Ошибки: {Errors}", 
+                        Input.Email, string.Join(", ", result.Errors.Select(e => e.Description)));
                 }
 
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
-            }
 
-            return Page();
+                return Page();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Критическая ошибка при регистрации пользователя {Email}", Input?.Email ?? "неизвестно");
+                ModelState.AddModelError(string.Empty, "Произошла ошибка при регистрации. Пожалуйста, попробуйте позже.");
+                return Page();
+            }
         }
 
         private BlogUser CreateUser()

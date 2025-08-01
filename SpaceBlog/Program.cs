@@ -93,6 +93,16 @@ builder.Services.AddCors(options =>
 builder.Services.AddRazorPages()
     .AddRazorRuntimeCompilation(); // Добавляем горячую перезагрузку Razor страниц
 
+// Настройка антифоджерных токенов
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-XSRF-TOKEN";
+    options.SuppressXFrameOptionsHeader = false;
+    options.Cookie.Name = "__RequestVerificationToken";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -109,7 +119,6 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
