@@ -55,7 +55,7 @@ namespace SpaceBlog.Models
         [StringLength(500)]
         public string? BanReason { get; set; }
 
-        // Роли теперь управляются через Identity
+        // Роли управляются через Identity
 
         [Display(Name = "Настройки уведомлений")]
         public bool EmailNotifications { get; set; } = true;
@@ -144,6 +144,4 @@ namespace SpaceBlog.Models
             return "Не назначена";
         }
     }
-
-    // Enum UserRole перенесен в статический класс Role.Names
 }
