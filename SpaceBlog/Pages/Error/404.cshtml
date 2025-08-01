@@ -1,0 +1,246 @@
+@page "/Error/404"
+@model SpaceBlog.Pages.Error.NotFoundModel
+@{
+    ViewData["Title"] = "Страница не найдена";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center" 
+     style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+    <div class="row w-100 justify-content-center">
+        <div class="col-lg-8 col-md-10 col-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-body text-center p-5">
+                    <!-- Космическая иллюстрация -->
+                    <div class="space-scene mb-4">
+                        <div class="astronaut">
+                            <i class="fas fa-rocket text-primary" style="font-size: 4rem;"></i>
+                        </div>
+                        <div class="planets">
+                            <i class="fas fa-circle text-warning planet-1"></i>
+                            <i class="fas fa-circle text-info planet-2"></i>
+                            <i class="fas fa-circle text-success planet-3"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Заголовок -->
+                    <h1 class="display-1 fw-bold text-primary mb-3" style="font-size: 8rem;">404</h1>
+                    <h2 class="h2 mb-4 text-dark">Упс! Страница потерялась в космосе</h2>
+                    
+                    <!-- Описание -->
+                    <div class="alert alert-light border-start border-primary border-4 mb-4">
+                        <p class="mb-2 fw-semibold">Запрашиваемая страница не найдена</p>
+                        <p class="mb-0 text-muted">
+                            Возможно, страница была перемещена, удалена или вы ввели неправильный адрес
+                        </p>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.RequestedUrl))
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-link me-2"></i>
+                            Запрошенный адрес: <code>@Model.RequestedUrl</code>
+                        </div>
+                    }
+                    
+                    <!-- Поиск -->
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h6 class="card-title">
+                                <i class="fas fa-search me-2"></i>Попробуйте найти то, что искали:
+                            </h6>
+                            <form method="get" asp-page="/Search" class="d-flex">
+                                <input type="text" name="query" class="form-control me-2" 
+                                       placeholder="Поиск по статьям, тегам, пользователям...">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Быстрые ссылки -->
+                    <div class="row mb-4">
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 quick-link-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-newspaper fa-2x text-primary mb-2"></i>
+                                    <h6>Статьи</h6>
+                                    <a asp-page="/Articles/All" class="btn btn-outline-primary btn-sm">
+                                        Читать статьи
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 quick-link-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-users fa-2x text-success mb-2"></i>
+                                    <h6>Сообщество</h6>
+                                    <a asp-page="/Users/All" class="btn btn-outline-success btn-sm">
+                                        Пользователи
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 quick-link-card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-tags fa-2x text-info mb-2"></i>
+                                    <h6>Темы</h6>
+                                    <a asp-page="/Tags/All" class="btn btn-outline-info btn-sm">
+                                        Теги
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Основные действия -->
+                    <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                        <a asp-page="/Index" class="btn btn-primary btn-lg">
+                            <i class="fas fa-home me-2"></i>Вернуться домой
+                        </a>
+                        <button onclick="history.back()" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-arrow-left me-2"></i>Назад
+                        </button>
+                        <button onclick="location.reload()" class="btn btn-outline-info btn-lg">
+                            <i class="fas fa-redo me-2"></i>Обновить
+                        </button>
+                    </div>
+                    
+                    <!-- Дополнительная помощь -->
+                    <div class="mt-5 pt-4 border-top">
+                        <p class="text-muted mb-3">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            Если проблема повторяется, свяжитесь с администрацией
+                        </p>
+                        <div class="d-flex flex-wrap justify-content-center gap-3 small">
+                            <span class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                @DateTime.Now.ToString("dd.MM.yyyy HH:mm")
+                            </span>
+                            <span class="text-muted">
+                                <i class="fas fa-code me-1"></i>
+                                Ошибка 404
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        /* Космическая анимация */
+        .space-scene {
+            position: relative;
+            height: 150px;
+            margin: 2rem 0;
+        }
+        
+        .astronaut {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .planets {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+        }
+        
+        .planet-1 {
+            position: absolute;
+            top: 20%;
+            left: 20%;
+            font-size: 1rem;
+            animation: orbit 8s linear infinite;
+        }
+        
+        .planet-2 {
+            position: absolute;
+            top: 60%;
+            right: 25%;
+            font-size: 0.7rem;
+            animation: orbit 12s linear infinite reverse;
+        }
+        
+        .planet-3 {
+            position: absolute;
+            bottom: 20%;
+            left: 60%;
+            font-size: 0.5rem;
+            animation: orbit 15s linear infinite;
+        }
+        
+        @@keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @@keyframes orbit {
+            0% { transform: rotate(0deg) translateX(30px) rotate(0deg); }
+            100% { transform: rotate(360deg) translateX(30px) rotate(-360deg); }
+        }
+        
+        /* Карточки быстрых ссылок */
+        .quick-link-card {
+            transition: all 0.3s ease;
+            border: 1px solid #e3e6f0;
+        }
+        
+        .quick-link-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+        
+        /* Основные стили */
+        .card {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+        
+        .display-1 {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Адаптивность */
+        @@media (max-width: 768px) {
+            .display-1 {
+                font-size: 5rem !important;
+            }
+            
+            .space-scene {
+                height: 100px;
+            }
+            
+            .astronaut i {
+                font-size: 2.5rem !important;
+            }
+            
+            .card-body {
+                padding: 2rem !important;
+            }
+        }
+        
+        @@media (max-width: 576px) {
+            .d-flex.flex-sm-row {
+                flex-direction: column !important;
+            }
+            
+            .btn-lg {
+                font-size: 1rem;
+                padding: 0.75rem 1rem;
+            }
+        }
+    </style>
+}

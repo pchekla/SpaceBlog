@@ -1,0 +1,151 @@
+@page
+@model SpaceBlog.Pages.Tags.IndexModel
+@{
+    ViewData["Title"] = "Управление тегами";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Заголовок с градиентом -->
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header text-center text-white py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h2 class="mb-0">
+                        <i class="fas fa-tags me-2"></i>Управление тегами
+                    </h2>
+                    <p class="mb-0 mt-2 opacity-75">Все теги блога для организации контента</p>
+                </div>
+
+                <div class="card-body p-4">
+                    <!-- Статус сообщение -->
+                    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>@Model.StatusMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <!-- Кнопка добавления нового тега -->
+                    <div class="text-center mb-4">
+                        <a asp-page="./Create" class="btn btn-lg text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                            <i class="fas fa-plus me-2"></i>Добавить новый тег
+                        </a>
+                    </div>
+
+                    <!-- Список тегов -->
+                    @if (Model.Tags.Any())
+                    {
+                        <div class="row">
+                            @foreach (var tag in Model.Tags)
+                            {
+                                <div class="col-lg-4 col-md-6 mb-3">
+                                    <div class="card border-0 shadow-sm h-100">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">
+                                                <i class="fas fa-tag text-primary me-2"></i>@tag.Name
+                                            </h5>
+                                            <p class="text-muted small">
+                                                <i class="fas fa-calendar me-1"></i>
+                                                Создан: @tag.CreatedAt.ToString("dd.MM.yyyy")
+                                            </p>
+                                            <p class="text-muted small">
+                                                <i class="fas fa-newspaper me-1"></i>
+                                                Статей: @tag.UsageCount
+                                            </p>
+                                            
+                                            <div class="mt-3">
+                                                <a asp-page="./Edit" asp-route-id="@tag.Id" class="btn btn-outline-primary btn-sm me-2">
+                                                    <i class="fas fa-edit me-1"></i>Изменить
+                                                </a>
+                                                @if (tag.UsageCount == 0)
+                                                {
+                                                    <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                            onclick="confirmDelete('@tag.Id', '@tag.Name')">
+                                                        <i class="fas fa-trash me-1"></i>Удалить
+                                                    </button>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">Теги не найдены</h4>
+                            <p class="text-muted">Создайте первый тег для организации контента</p>
+                            <a asp-page="./Create" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Создать первый тег
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для подтверждения удаления -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>Подтверждение удаления
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить тег <strong id="tagNameToDelete"></strong>?</p>
+                <p class="text-muted small">Это действие нельзя отменить.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Отмена
+                </button>
+                <form id="deleteForm" method="post" asp-page-handler="Delete" class="d-inline">
+                    <input type="hidden" id="tagIdToDelete" name="id" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i>Удалить
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(tagId, tagName) {
+            document.getElementById('tagIdToDelete').value = tagId;
+            document.getElementById('tagNameToDelete').textContent = tagName;
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        }
+    </script>
+    
+    <style>
+        /* Custom CSS for tags index page */
+        .card {
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        @@media (max-width: 576px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+        }
+    </style>
+}

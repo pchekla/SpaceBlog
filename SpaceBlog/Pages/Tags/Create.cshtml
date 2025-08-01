@@ -1,0 +1,96 @@
+@page
+@model SpaceBlog.Pages.Tags.CreateModel
+@{
+    ViewData["Title"] = "Добавление тега";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8 col-sm-10">
+            <div class="card shadow-lg border-0">
+                <!-- Заголовок с градиентом -->
+                <div class="card-header text-center text-white py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.5rem 0.5rem 0 0;">
+                    <h2 class="mb-0">
+                        <i class="fas fa-tag me-2"></i>Добавление тега
+                    </h2>
+                    <p class="mb-0 mt-2 opacity-75">Создайте новый тег для организации контента</p>
+                </div>
+
+                <div class="card-body p-4">
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        
+                        <!-- Название -->
+                        <div class="form-floating mb-4">
+                            <input asp-for="Input.Name" class="form-control" autocomplete="off" aria-required="true" placeholder="Введите название тега" />
+                            <label asp-for="Input.Name" class="text-muted">
+                                <i class="fas fa-tag me-1"></i>Название
+                            </label>
+                            <span asp-validation-for="Input.Name" class="text-danger"></span>
+                        </div>
+                        
+                        <!-- Кнопка добавления -->
+                        <div class="d-grid mb-4">
+                            <button type="submit" class="btn btn-lg text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                                <i class="fas fa-plus me-2"></i>Добавить
+                            </button>
+                        </div>
+                        
+                        <!-- Ссылка на список -->
+                        <div class="text-center">
+                            <a asp-page="./Index" class="text-decoration-none fw-semibold" style="color: #667eea;">
+                                <i class="fas fa-list me-1"></i>Перейти к списку всех тегов
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Футер карточки -->
+                <div class="card-footer text-center py-3" style="background-color: #f8f9fa; border-radius: 0 0 0.5rem 0.5rem;">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Теги помогают организовать и найти статьи по темам
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <style>
+        /* Custom CSS for create tag page */
+        .card {
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label {
+            color: #667eea !important;
+        }
+        
+        .form-floating > .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        @@media (max-width: 576px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .card-header h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+}

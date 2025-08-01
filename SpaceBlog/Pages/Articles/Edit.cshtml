@@ -1,0 +1,148 @@
+@page "{id:int}"
+@model SpaceBlog.Pages.Articles.EditModel
+@{
+    ViewData["Title"] = "Редактирование статьи";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-md-12">
+            <div class="card shadow-lg border-0">
+                <!-- Заголовок с градиентом -->
+                <div class="card-header text-center text-white py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.5rem 0.5rem 0 0;">
+                    <h2 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>Редактирование статьи
+                    </h2>
+                    <p class="mb-0 mt-2 opacity-75">Измените содержание статьи и выберите теги</p>
+                </div>
+
+                <div class="card-body p-4">
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        
+                        <!-- Выбор тегов -->
+                        @if (Model.AvailableTags.Any())
+                        {
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-muted mb-3">
+                                    <i class="fas fa-tags me-2"></i>Выберите теги для статьи:
+                                </label>
+                                <div class="row">
+                                    @for (int i = 0; i < Model.AvailableTags.Count; i++)
+                                    {
+                                        <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" 
+                                                       asp-for="SelectedTagIds" value="@Model.AvailableTags[i].Id" 
+                                                       id="tag_@Model.AvailableTags[i].Id"
+                                                       checked="@Model.SelectedTagIds.Contains(Model.AvailableTags[i].Id)" />
+                                                <label class="form-check-label" for="tag_@Model.AvailableTags[i].Id">
+                                                    @Model.AvailableTags[i].Name
+                                                </label>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                <span asp-validation-for="SelectedTagIds" class="text-danger"></span>
+                            </div>
+                        }
+                        
+                        <!-- Заголовок -->
+                        <div class="form-floating mb-4">
+                            <input asp-for="Input.Title" class="form-control" autocomplete="off" aria-required="true" placeholder="Введите заголовок статьи" />
+                            <label asp-for="Input.Title" class="text-muted">
+                                <i class="fas fa-heading me-1"></i>Заголовок
+                            </label>
+                            <span asp-validation-for="Input.Title" class="text-danger"></span>
+                        </div>
+                        
+                        <!-- Контент -->
+                        <div class="form-floating mb-4">
+                            <textarea asp-for="Input.Content" class="form-control" style="height: 300px;" placeholder="Введите содержание статьи"></textarea>
+                            <label asp-for="Input.Content" class="text-muted">
+                                <i class="fas fa-file-alt me-1"></i>Контент
+                            </label>
+                            <span asp-validation-for="Input.Content" class="text-danger"></span>
+                        </div>
+                        
+                        <!-- Кнопки -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-lg text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                                        <i class="fas fa-save me-2"></i>Сохранить изменения
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="d-grid">
+                                    <a asp-page="./Index" class="btn btn-outline-secondary btn-lg">
+                                        <i class="fas fa-times me-2"></i>Выйти без сохранения
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Футер карточки -->
+                <div class="card-footer text-center py-3" style="background-color: #f8f9fa; border-radius: 0 0 0.5rem 0.5rem;">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Статья была создана @Model.Article.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <style>
+        /* Custom CSS for edit article page */
+        .card {
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label,
+        .form-floating > textarea:focus ~ label,
+        .form-floating > textarea:not(:placeholder-shown) ~ label {
+            color: #667eea !important;
+        }
+        
+        .form-floating > .form-control:focus,
+        .form-floating > textarea:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .form-check-input:checked {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+        
+        .form-check-input:focus {
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        @@media (max-width: 576px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .card-header h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+}

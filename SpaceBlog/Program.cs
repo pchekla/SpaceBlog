@@ -6,12 +6,31 @@ using SpaceBlog.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=SpaceBlog.db";
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(connectionString));
+{
+    // Автоматически определяем тип базы данных по строке подключения
+    if (connectionString.Contains("Data Source=") && connectionString.EndsWith(".db"))
+    {
+        // SQLite
+        options.UseSqlite(connectionString);
+    }
+    else if (connectionString.Contains("Server=") && (connectionString.Contains("SQLEXPRESS") || connectionString.Contains("Trusted_Connection")))
+    {
+        // SQL Server
+        options.UseSqlServer(connectionString);
+    }
+    else
+    {
+        // MySQL - используем фиксированную версию для избежания проблем с автоопределением при недоступности сервера
+        var serverVersion = new MySqlServerVersion(new Version(8, 0, 21));
+        options.UseMySql(connectionString, serverVersion);
+    }
+});
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<BlogUser>(options => 
+// Настройка Identity с ролями
+builder.Services.AddIdentity<BlogUser, Role>(options => 
     {
         options.SignIn.RequireConfirmedAccount = false;
         options.Password.RequireDigit = true;
@@ -21,8 +40,8 @@ builder.Services.AddDefaultIdentity<BlogUser>(options =>
         options.Password.RequireLowercase = false;
         options.User.RequireUniqueEmail = true;
     })
-    .AddRoles<Role>() // Добавляем поддержку ролей
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
 
 // Добавляем поддержку Web API контроллеров
 builder.Services.AddControllers()
@@ -71,7 +90,8 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages()
+    .AddRazorRuntimeCompilation(); // Добавляем горячую перезагрузку Razor страниц
 
 var app = builder.Build();
 
@@ -102,18 +122,45 @@ app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Инициализация данных
+// Инициализация базы данных и данных
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    
     try
     {
-        await SpaceBlog.Data.SeedData.InitializeAsync(services);
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        
+        // Проверка подключения к базе данных
+        logger.LogInformation("Проверка подключения к базе данных...");
+        await context.Database.CanConnectAsync();
+        logger.LogInformation("Подключение к базе данных успешно.");
+        
+        // Создание базы данных если она не существует
+        logger.LogInformation("Создание базы данных если не существует...");
+        await context.Database.EnsureCreatedAsync();
+        
+        // Применение миграций
+        logger.LogInformation("Применение миграций...");
+        await context.Database.MigrateAsync();
+        
+        // Инициализация тестовых данных
+        logger.LogInformation("Инициализация тестовых данных...");
+        await SpaceBlog.Data.SeedData.Initialize(services);
+        
+        logger.LogInformation("Инициализация базы данных завершена успешно.");
     }
     catch (Exception ex)
     {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Ошибка при инициализации данных");
+        logger.LogError(ex, "Ошибка при инициализации базы данных");
+        logger.LogWarning("ВАЖНО: Проверьте настройки подключения к MySQL в appsettings.json");
+        logger.LogWarning("Убедитесь что:");
+        logger.LogWarning("1. MySQL Server запущен");
+        logger.LogWarning("2. База данных создана");
+        logger.LogWarning("3. Пользователь имеет права доступа");
+        logger.LogWarning("4. Строка подключения корректна");
+        logger.LogWarning("Приложение продолжит работу, но без доступа к базе данных.");
     }
 }
 

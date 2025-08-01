@@ -1,0 +1,439 @@
+@page "{id}"
+@model SpaceBlog.Pages.Users.DetailsModel
+@{
+    ViewData["Title"] = Model.UserProfile?.DisplayName ?? "Пользователь не найден";
+}
+
+@if (Model.UserProfile == null)
+{
+    <div class="container mt-4">
+        <div class="alert alert-warning text-center">
+            <i class="fas fa-user-slash fa-2x mb-3"></i>
+            <h4>Пользователь не найден</h4>
+            <p>Запрашиваемый пользователь не существует или был удален.</p>
+            <a asp-page="/Users/All" class="btn btn-primary">
+                <i class="fas fa-arrow-left me-2"></i>Вернуться к списку пользователей
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container mt-4">
+        <!-- Навигационные крошки -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="/Index">Главная</a></li>
+                <li class="breadcrumb-item"><a asp-page="/Users/All">Пользователи</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.UserProfile.DisplayName</li>
+            </ol>
+        </nav>
+
+        @if (!string.IsNullOrEmpty(Model.StatusMessage))
+        {
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="fas fa-info-circle me-2"></i>@Model.StatusMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <div class="row">
+            <!-- Профиль пользователя -->
+            <div class="col-lg-4 col-md-12 mb-4">
+                <div class="card shadow-sm border-0 h-100">
+                    <!-- Заголовок профиля -->
+                    <div class="card-header text-center text-white py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <div class="position-relative d-inline-block mb-3">
+                            <div class="bg-white rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 80px; height: 80px; margin: 0 auto;">
+                                <i class="fas fa-user fa-2x text-primary"></i>
+                            </div>
+                            @if (Model.UserProfile.IsOnline)
+                            {
+                                <span class="position-absolute bottom-0 end-0 badge bg-success rounded-pill">
+                                    <i class="fas fa-circle" style="font-size: 8px;"></i>
+                                </span>
+                            }
+                        </div>
+                        <h4 class="mb-1">@Model.UserProfile.DisplayName</h4>
+                        @if (!string.IsNullOrEmpty(Model.UserProfile.Email))
+                        {
+                            <p class="mb-0 opacity-75">@Model.UserProfile.Email</p>
+                        }
+                    </div>
+
+                    <!-- Информация профиля -->
+                    <div class="card-body">
+                        <div class="row text-center mb-4">
+                            <div class="col-4">
+                                <div class="text-primary h4">@Model.UserProfile.ArticlesCount</div>
+                                <small class="text-muted">Статей</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-success h4">@Model.UserProfile.CommentsCount</div>
+                                <small class="text-muted">Комментариев</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-info h4">@Model.UserProfile.TotalViews</div>
+                                <small class="text-muted">Просмотров</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-2"><i class="fas fa-info-circle me-2"></i>Информация</h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Имя пользователя:</span>
+                                <span class="fw-semibold">@Model.UserProfile.UserName</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Дата регистрации:</span>
+                                <span class="fw-semibold">@Model.UserProfile.RegistrationDate.ToString("dd.MM.yyyy")</span>
+                            </div>
+                            @if (Model.UserProfile.LastLoginDate.HasValue)
+                            {
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Последний вход:</span>
+                                    <span class="fw-semibold">@Model.UserProfile.LastLoginDate.Value.ToString("dd.MM.yyyy HH:mm")</span>
+                                </div>
+                            }
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Статус:</span>
+                                <span class="badge @(Model.UserProfile.IsOnline ? "bg-success" : "bg-secondary")">
+                                    @(Model.UserProfile.IsOnline ? "Онлайн" : "Офлайн")
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Роли пользователя -->
+                        @if (Model.UserProfile.Roles.Any())
+                        {
+                            <div class="mb-3">
+                                <h6 class="text-muted mb-2"><i class="fas fa-shield-alt me-2"></i>Роли</h6>
+                                <div>
+                                    @foreach (var role in Model.UserProfile.Roles)
+                                    {
+                                        <span class="badge bg-primary me-1 mb-1">
+                                            <i class="fas fa-crown me-1"></i>@role
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Действия для администраторов -->
+                        @if (User.Identity?.IsAuthenticated == true && Model.CanManageUsers())
+                        {
+                            <div class="mt-4">
+                                <h6 class="text-muted mb-2"><i class="fas fa-cog me-2"></i>Управление</h6>
+                                <div class="d-grid gap-2">
+                                    <a asp-page="/Users/Edit" asp-route-id="@Model.UserProfile.Id" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-edit me-1"></i>Редактировать профиль
+                                    </a>
+                                    @if (Model.UserProfile.Id != Model.CurrentUserId)
+                                    {
+                                        <button type="button" class="btn btn-outline-danger btn-sm"
+                                                onclick="confirmAction('ban', '@Model.UserProfile.Id', '@Model.UserProfile.DisplayName')">
+                                            <i class="fas fa-user-slash me-1"></i>Заблокировать
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Контент пользователя -->
+            <div class="col-lg-8 col-md-12">
+                <!-- Навигация по вкладкам -->
+                <ul class="nav nav-tabs mb-4" id="userContentTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="articles-tab" data-bs-toggle="tab" data-bs-target="#articles" 
+                                type="button" role="tab" aria-controls="articles" aria-selected="true">
+                            <i class="fas fa-newspaper me-2"></i>Статьи (@Model.UserArticles.Count)
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="comments-tab" data-bs-toggle="tab" data-bs-target="#comments" 
+                                type="button" role="tab" aria-controls="comments" aria-selected="false">
+                            <i class="fas fa-comments me-2"></i>Комментарии (@Model.UserComments.Count)
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="activity-tab" data-bs-toggle="tab" data-bs-target="#activity" 
+                                type="button" role="tab" aria-controls="activity" aria-selected="false">
+                            <i class="fas fa-chart-line me-2"></i>Активность
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Содержимое вкладок -->
+                <div class="tab-content" id="userContentTabsContent">
+                    <!-- Статьи пользователя -->
+                    <div class="tab-pane fade show active" id="articles" role="tabpanel" aria-labelledby="articles-tab">
+                        @if (Model.UserArticles.Any())
+                        {
+                            <div class="row">
+                                @foreach (var article in Model.UserArticles.Take(6))
+                                {
+                                    <div class="col-lg-6 col-md-12 mb-4">
+                                        <div class="card border-0 shadow-sm h-100 article-card">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <h6 class="card-title mb-1">
+                                                        <a asp-page="/Articles/Details" asp-route-id="@article.Id" 
+                                                           class="text-decoration-none text-dark">@article.Title</a>
+                                                    </h6>
+                                                    @if (article.IsPublished)
+                                                    {
+                                                        <span class="badge bg-success">Опубликована</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-warning text-dark">Черновик</span>
+                                                    }
+                                                </div>
+                                                @if (!string.IsNullOrEmpty(article.Summary))
+                                                {
+                                                    <p class="card-text text-muted small mb-2">@article.Summary</p>
+                                                }
+                                                <div class="d-flex justify-content-between text-muted small">
+                                                    <span><i class="fas fa-calendar me-1"></i>@article.CreatedAt.ToString("dd.MM.yyyy")</span>
+                                                    <span><i class="fas fa-eye me-1"></i>@article.ViewCount</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            @if (Model.UserArticles.Count > 6)
+                            {
+                                <div class="text-center">
+                                    <a asp-page="/Articles/All" asp-route-author="@Model.UserProfile.Id" class="btn btn-outline-primary">
+                                        <i class="fas fa-plus me-2"></i>Показать все статьи (@Model.UserArticles.Count)
+                                    </a>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Статьи не найдены</h5>
+                                <p class="text-muted">Пользователь пока не опубликовал ни одной статьи</p>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Комментарии пользователя -->
+                    <div class="tab-pane fade" id="comments" role="tabpanel" aria-labelledby="comments-tab">
+                        @if (Model.UserComments.Any())
+                        {
+                            @foreach (var comment in Model.UserComments.Take(10))
+                            {
+                                <div class="card border-0 shadow-sm mb-3 comment-card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <h6 class="mb-1">
+                                                    Комментарий к статье 
+                                                    <a asp-page="/Articles/Details" asp-route-id="@comment.ArticleId" 
+                                                       class="text-decoration-none">"@comment.ArticleTitle"</a>
+                                                </h6>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-clock me-1"></i>@comment.CreatedAt.ToString("dd MMMM yyyy, HH:mm")
+                                                </small>
+                                            </div>
+                                            @if (comment.IsApproved)
+                                            {
+                                                <span class="badge bg-success">Одобрен</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning text-dark">На модерации</span>
+                                            }
+                                        </div>
+                                        <div class="comment-content">
+                                            @(comment.Content.Length > 200 ? comment.Content.Substring(0, 200) + "..." : comment.Content)
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @if (Model.UserComments.Count > 10)
+                            {
+                                <div class="text-center">
+                                    <button class="btn btn-outline-primary" onclick="loadMoreComments()">
+                                        <i class="fas fa-plus me-2"></i>Показать еще комментарии
+                                    </button>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center py-5">
+                                <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Комментарии не найдены</h5>
+                                <p class="text-muted">Пользователь пока не оставил ни одного комментария</p>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Активность пользователя -->
+                    <div class="tab-pane fade" id="activity" role="tabpanel" aria-labelledby="activity-tab">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Статистика публикаций</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Опубликованные статьи:</span>
+                                            <span class="fw-bold text-success">@Model.UserProfile.PublishedArticles</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Черновики:</span>
+                                            <span class="fw-bold text-warning">@Model.UserProfile.DraftArticles</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Общее количество просмотров:</span>
+                                            <span class="fw-bold text-primary">@Model.UserProfile.TotalViews</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0"><i class="fas fa-comments me-2"></i>Активность в комментариях</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Всего комментариев:</span>
+                                            <span class="fw-bold text-info">@Model.UserProfile.CommentsCount</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Одобренные:</span>
+                                            <span class="fw-bold text-success">@Model.UserProfile.ApprovedComments</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>На модерации:</span>
+                                            <span class="fw-bold text-warning">@(Model.UserProfile.CommentsCount - Model.UserProfile.ApprovedComments)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- График активности (заглушка) -->
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>Активность по месяцам</h6>
+                            </div>
+                            <div class="card-body text-center py-5">
+                                <i class="fas fa-chart-area fa-3x text-muted mb-3"></i>
+                                <h6 class="text-muted">График активности</h6>
+                                <p class="text-muted small">Здесь будет отображаться график активности пользователя</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для действий -->
+    <div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="actionModalLabel">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>Подтверждение действия
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="actionModalText"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Отмена
+                    </button>
+                    <form id="actionForm" method="post" class="d-inline">
+                        <input type="hidden" id="actionUserId" name="userId" />
+                        <input type="hidden" id="actionType" name="actionType" />
+                        <button type="submit" class="btn btn-danger" id="confirmActionBtn">
+                            <i class="fas fa-check me-1"></i>Подтвердить
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function confirmAction(actionType, userId, userName) {
+            document.getElementById('actionUserId').value = userId;
+            document.getElementById('actionType').value = actionType;
+            
+            let actionText = '';
+            if (actionType === 'ban') {
+                actionText = `Вы уверены, что хотите заблокировать пользователя "${userName}"?`;
+            }
+            
+            document.getElementById('actionModalText').textContent = actionText;
+            
+            var actionModal = new bootstrap.Modal(document.getElementById('actionModal'));
+            actionModal.show();
+        }
+
+        function loadMoreComments() {
+            // Здесь можно реализовать AJAX-загрузку дополнительных комментариев
+            alert('Функция загрузки дополнительных комментариев будет реализована позже');
+        }
+    </script>
+    
+    <style>
+        /* Стили для страницы пользователя */
+        .article-card, .comment-card {
+            transition: all 0.3s ease;
+            border: 1px solid #e3e6f0 !important;
+        }
+        
+        .article-card:hover, .comment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+            border-color: #667eea !important;
+        }
+        
+        .comment-content {
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+        
+        .nav-tabs .nav-link {
+            border: none;
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background-color: transparent;
+            border-bottom: 3px solid #667eea;
+            color: #667eea;
+        }
+        
+        @@media (max-width: 768px) {
+            .nav-tabs .nav-link {
+                font-size: 0.9rem;
+                padding: 0.5rem 0.75rem;
+            }
+            
+            .nav-tabs .nav-link i {
+                display: none;
+            }
+        }
+    </style>
+}

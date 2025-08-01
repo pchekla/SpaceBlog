@@ -1,0 +1,415 @@
+@page "{id:int}"
+@model SpaceBlog.Pages.Articles.DetailsModel
+@{
+    ViewData["Title"] = Model.Article?.Title ?? "Статья не найдена";
+}
+
+@if (Model.Article == null)
+{
+    <div class="container mt-4">
+        <div class="alert alert-warning text-center">
+            <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+            <h4>Статья не найдена</h4>
+            <p>Запрашиваемая статья не существует или была удалена.</p>
+            <a asp-page="/Articles/All" class="btn btn-primary">
+                <i class="fas fa-arrow-left me-2"></i>Вернуться к списку статей
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container mt-4">
+        <!-- Навигационные крошки -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-page="/Index">Главная</a></li>
+                <li class="breadcrumb-item"><a asp-page="/Articles/All">Статьи</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.Article.Title</li>
+            </ol>
+        </nav>
+
+        @if (!string.IsNullOrEmpty(Model.StatusMessage))
+        {
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="fas fa-info-circle me-2"></i>@Model.StatusMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <!-- Основная статья -->
+        <div class="row">
+            <div class="col-lg-8 col-md-12">
+                <article class="card shadow-sm border-0 mb-4">
+                    <!-- Заголовок статьи -->
+                    <div class="card-header bg-white border-bottom-0 pt-4 pb-3">
+                        <h1 class="display-6 mb-3">@Model.Article.Title</h1>
+                        
+                        <div class="d-flex justify-content-between align-items-center flex-wrap">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="me-3">
+                                    <i class="fas fa-user text-muted me-1"></i>
+                                                                                        <a asp-page="/Users/Details" asp-route-id="@Model.Article.AuthorId" 
+                                                       class="fw-semibold text-decoration-none">@Model.Article.AuthorName</a>
+                                </div>
+                                <div class="me-3">
+                                    <i class="fas fa-calendar text-muted me-1"></i>
+                                    <span class="text-muted">@Model.Article.CreatedAt.ToString("dd MMMM yyyy, HH:mm")</span>
+                                </div>
+                                <div>
+                                    <i class="fas fa-eye text-muted me-1"></i>
+                                    <span class="text-muted">@Model.Article.ViewCount просмотров</span>
+                                </div>
+                            </div>
+                            
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <div class="mb-2">
+                                    @if (Model.CanEditArticle())
+                                    {
+                                        <a asp-page="/Articles/Edit" asp-route-id="@Model.Article.Id" class="btn btn-outline-secondary btn-sm me-1">
+                                            <i class="fas fa-edit me-1"></i>Изменить
+                                        </a>
+                                    }
+                                    @if (Model.CanDeleteArticle())
+                                    {
+                                        <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                onclick="confirmDelete('@Model.Article.Id', '@Model.Article.Title')">
+                                            <i class="fas fa-trash me-1"></i>Удалить
+                                        </button>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        @if (Model.Article.UpdatedAt.HasValue && Model.Article.UpdatedAt != Model.Article.CreatedAt)
+                        {
+                            <div class="text-muted small mt-2">
+                                <i class="fas fa-edit me-1"></i>
+                                Последнее изменение: @Model.Article.UpdatedAt.Value.ToString("dd MMMM yyyy, HH:mm")
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Содержимое статьи -->
+                    <div class="card-body">
+                        @if (!string.IsNullOrEmpty(Model.Article.Summary))
+                        {
+                            <div class="alert alert-light border-start border-primary border-3 mb-4">
+                                <h6 class="fw-bold text-primary mb-2">Краткое описание</h6>
+                                <p class="mb-0">@Model.Article.Summary</p>
+                            </div>
+                        }
+
+                        <div class="article-content">
+                            @Html.Raw(Model.Article.FormattedContent)
+                        </div>
+                    </div>
+
+                    <!-- Теги статьи -->
+                    @if (Model.Article.Tags.Any())
+                    {
+                        <div class="card-footer bg-light">
+                            <h6 class="mb-2"><i class="fas fa-tags me-2"></i>Теги:</h6>
+                            <div>
+                                @foreach (var tag in Model.Article.Tags)
+                                {
+                                    <a asp-page="/Tags/Details" asp-route-id="@tag.Id" 
+                                       class="badge bg-primary text-decoration-none me-2 mb-1 p-2">
+                                        <i class="fas fa-tag me-1"></i>@tag.Name
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    }
+                </article>
+            </div>
+
+            <!-- Боковая панель -->
+            <div class="col-lg-4 col-md-12">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Информация о статье</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="text-primary h4">@Model.Article.ViewCount</div>
+                                <small class="text-muted">Просмотров</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-success h4">@Model.Article.Comments.Count(c => c.IsApproved)</div>
+                                <small class="text-muted">Комментариев</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-info h4">@Model.Article.Tags.Count</div>
+                                <small class="text-muted">Тегов</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Другие статьи автора -->
+                @if (Model.OtherArticles.Any())
+                {
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="fas fa-user-edit me-2"></i>Другие статьи автора</h6>
+                        </div>
+                        <div class="card-body">
+                            @foreach (var otherArticle in Model.OtherArticles.Take(5))
+                            {
+                                <div class="mb-3">
+                                    <h6 class="mb-1">
+                                        <a asp-page="/Articles/Details" asp-route-id="@otherArticle.Id" 
+                                           class="text-decoration-none">@otherArticle.Title</a>
+                                    </h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>@otherArticle.CreatedAt.ToString("dd.MM.yyyy")
+                                        <span class="mx-1">•</span>
+                                        <i class="fas fa-eye me-1"></i>@otherArticle.ViewCount
+                                    </small>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Секция комментариев -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-comments me-2"></i>
+                            Комментарии (@Model.Article.Comments.Count(c => c.IsApproved))
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Форма добавления комментария -->
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <div class="mb-4">
+                                <h6><i class="fas fa-plus me-2"></i>Добавить комментарий</h6>
+                                <form method="post" asp-page-handler="AddComment">
+                                    <input type="hidden" asp-for="NewComment.ArticleId" value="@Model.Article.Id" />
+                                    <div class="mb-3">
+                                        <textarea asp-for="NewComment.Content" class="form-control" rows="4" 
+                                                  placeholder="Напишите ваш комментарий..."></textarea>
+                                        <span asp-validation-for="NewComment.Content" class="text-danger"></span>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-paper-plane me-2"></i>Отправить комментарий
+                                    </button>
+                                </form>
+                            </div>
+                            <hr>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info mb-4">
+                                <i class="fas fa-sign-in-alt me-2"></i>
+                                <a asp-area="Identity" asp-page="/Account/Login" class="alert-link">Войдите</a> 
+                                или <a asp-area="Identity" asp-page="/Account/Register" class="alert-link">зарегистрируйтесь</a>, 
+                                чтобы оставить комментарий.
+                            </div>
+                        }
+
+                        <!-- Список комментариев -->
+                        @if (Model.Article.Comments.Any(c => c.IsApproved))
+                        {
+                            <div class="comments-list">
+                                @foreach (var comment in Model.Article.Comments.Where(c => c.IsApproved).OrderBy(c => c.CreatedAt))
+                                {
+                                    <div class="comment-item border-start border-3 border-light ps-3 mb-4">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <h6 class="mb-1">
+                                                    <a asp-page="/Users/Details" asp-route-id="@comment.AuthorId" 
+                                                       class="text-decoration-none">@comment.AuthorName</a>
+                                                </h6>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-clock me-1"></i>
+                                                    @comment.CreatedAt.ToString("dd MMMM yyyy, HH:mm")
+                                                </small>
+                                            </div>
+                                            @if (User.Identity?.IsAuthenticated == true && Model.CanModerateComments())
+                                            {
+                                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                                        onclick="confirmDeleteComment('@comment.Id', '@comment.AuthorName')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                        <div class="comment-content">
+                                            @Html.Raw(comment.FormattedContent)
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-4 text-muted">
+                                <i class="fas fa-comment-slash fa-2x mb-3"></i>
+                                <p>Пока нет комментариев к этой статье.</p>
+                                @if (User.Identity?.IsAuthenticated == true)
+                                {
+                                    <p>Станьте первым, кто оставит комментарий!</p>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для удаления статьи -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>Подтверждение удаления
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Вы уверены, что хотите удалить статью <strong id="articleTitleToDelete"></strong>?</p>
+                    <p class="text-muted small">Это действие нельзя отменить. Все комментарии к статье также будут удалены.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Отмена
+                    </button>
+                    <form id="deleteForm" method="post" asp-page-handler="Delete" class="d-inline">
+                        <input type="hidden" id="articleIdToDelete" name="id" />
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-1"></i>Удалить
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для удаления комментария -->
+    <div class="modal fade" id="deleteCommentModal" tabindex="-1" aria-labelledby="deleteCommentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteCommentModalLabel">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>Удаление комментария
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Вы уверены, что хотите удалить комментарий от <strong id="commentAuthorToDelete"></strong>?</p>
+                    <p class="text-muted small">Это действие нельзя отменить.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Отмена
+                    </button>
+                    <form id="deleteCommentForm" method="post" asp-page-handler="DeleteComment" class="d-inline">
+                        <input type="hidden" id="commentIdToDelete" name="commentId" />
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-1"></i>Удалить
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        function confirmDelete(articleId, articleTitle) {
+            document.getElementById('articleIdToDelete').value = articleId;
+            document.getElementById('articleTitleToDelete').textContent = articleTitle;
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        }
+
+        function confirmDeleteComment(commentId, authorName) {
+            document.getElementById('commentIdToDelete').value = commentId;
+            document.getElementById('commentAuthorToDelete').textContent = authorName;
+            var deleteCommentModal = new bootstrap.Modal(document.getElementById('deleteCommentModal'));
+            deleteCommentModal.show();
+        }
+    </script>
+    
+    <style>
+        /* Стили для статьи */
+        .article-content {
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+        
+        .article-content p {
+            margin-bottom: 1.2rem;
+        }
+        
+        .article-content h1, .article-content h2, .article-content h3 {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .article-content blockquote {
+            border-left: 4px solid #007bff;
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+            background-color: #f8f9fa;
+            padding: 1rem;
+        }
+        
+        .article-content code {
+            background-color: #f8f9fa;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-size: 0.9rem;
+        }
+        
+        .article-content pre {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            overflow-x: auto;
+        }
+        
+        /* Стили для комментариев */
+        .comment-item {
+            transition: all 0.3s ease;
+        }
+        
+        .comment-item:hover {
+            border-color: #007bff !important;
+            background-color: #f8f9fa;
+            border-radius: 0.375rem;
+            padding: 1rem !important;
+            margin-left: -1rem !important;
+        }
+        
+        .comment-content {
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        
+        @@media (max-width: 768px) {
+            .display-6 {
+                font-size: 1.5rem;
+            }
+            
+            .article-content {
+                font-size: 1rem;
+            }
+        }
+    </style>
+}

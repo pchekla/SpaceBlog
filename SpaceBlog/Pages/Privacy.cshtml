@@ -1,8 +1,97 @@
 ﻿@page
 @model PrivacyModel
 @{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "Политика конфиденциальности";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="row justify-content-center fade-in-up">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="hero-section text-center" style="border-radius: 15px 15px 0 0; padding: 40px 30px;">
+                <div class="content">
+                    <h1 class="mb-0">
+                        <i class="fas fa-shield-alt me-3"></i>@ViewData["Title"]
+                    </h1>
+                </div>
+            </div>
+            <div class="card-body p-5">
+                <p class="lead text-center mb-5">Мы ценим вашу конфиденциальность и стремимся защитить ваши персональные данные.</p>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 border-0" style="background: rgba(102, 126, 234, 0.05);">
+                            <div class="card-body">
+                                <h5><i class="fas fa-info-circle me-2" style="color: #667eea;"></i>Сбор информации</h5>
+                                <p class="mb-3">Наш блог собирает минимальную информацию:</p>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Email для регистрации</li>
+                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Имя для отображения</li>
+                                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Контент статей и комментариев</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 border-0" style="background: rgba(118, 75, 162, 0.05);">
+                            <div class="card-body">
+                                <h5><i class="fas fa-database me-2" style="color: #764ba2;"></i>Хранение данных</h5>
+                                <p class="mb-3">Защищенная база данных с принципами:</p>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="fas fa-lock text-primary me-2"></i>Шифрование паролей</li>
+                                    <li class="mb-2"><i class="fas fa-lock text-primary me-2"></i>Контроль доступа</li>
+                                    <li class="mb-2"><i class="fas fa-lock text-primary me-2"></i>Регулярные бэкапы</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0" style="background: rgba(255, 255, 255, 0.7);">
+                    <div class="card-body">
+                        <h5 class="text-center mb-4"><i class="fas fa-users me-2" style="color: #667eea;"></i>Система ролей и прав</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <span class="badge bg-info fs-6 mb-2">👤 Пользователи</span>
+                                    <p class="mb-1">Создание комментариев</p>
+                                </div>
+                                <div class="mb-3">
+                                    <span class="badge bg-success fs-6 mb-2">✍️ Авторы</span>
+                                    <p class="mb-1">Создание и редактирование статей</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <span class="badge bg-warning fs-6 mb-2">🛡️ Модераторы</span>
+                                    <p class="mb-1">Управление комментариями</p>
+                                </div>
+                                <div class="mb-3">
+                                    <span class="badge bg-danger fs-6 mb-2">👑 Администраторы</span>
+                                    <p class="mb-1">Полный доступ к системе</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-4 border-0" style="background: rgba(102, 126, 234, 0.1);">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-lightbulb fa-2x me-3" style="color: #667eea;"></i>
+                        <div>
+                            <strong>Обратите внимание:</strong> Это демонстрационный блог, созданный для изучения ASP.NET Core и системы авторизации.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-5">
+                    <a asp-page="/Index" class="btn btn-primary-modern btn-modern btn-lg me-3">
+                        <i class="fas fa-home me-2"></i>Главная страница
+                    </a>
+                    <a href="/api/docs" target="_blank" class="btn btn-outline-primary btn-modern btn-lg">
+                        <i class="fas fa-book me-2"></i>API документация
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

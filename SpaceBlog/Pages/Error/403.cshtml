@@ -1,0 +1,131 @@
+@page "/Error/403"
+@model SpaceBlog.Pages.Error.ForbiddenModel
+@{
+    ViewData["Title"] = "Доступ запрещен";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center" 
+     style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="row w-100 justify-content-center">
+        <div class="col-lg-6 col-md-8 col-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-body text-center p-5">
+                    <!-- Иконка ошибки -->
+                    <div class="error-icon mb-4">
+                        <i class="fas fa-shield-alt text-danger" style="font-size: 5rem;"></i>
+                    </div>
+                    
+                    <!-- Заголовок -->
+                    <h1 class="display-4 fw-bold text-danger mb-3">403</h1>
+                    <h2 class="h3 mb-4 text-dark">Доступ запрещен</h2>
+                    
+                    <!-- Описание -->
+                    <div class="alert alert-light border-start border-danger border-4 mb-4">
+                        <p class="mb-2 fw-semibold">У вас недостаточно прав для доступа к этой странице</p>
+                        <p class="mb-0 text-muted small">
+                            Возможные причины:
+                        </p>
+                        <ul class="text-muted small text-start mb-0 mt-2">
+                            <li>Требуется авторизация в системе</li>
+                            <li>Необходимы права администратора или модератора</li>
+                            <li>Доступ к ресурсу ограничен</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Дополнительная информация -->
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Вы вошли как <strong>@User.Identity.Name</strong>, но у вас нет прав для доступа к этому разделу.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            Для доступа к этой странице необходимо войти в систему.
+                        </div>
+                    }
+                    
+                    <!-- Действия -->
+                    <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center mt-4">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <a asp-page="/Index" class="btn btn-primary">
+                                <i class="fas fa-home me-2"></i>На главную
+                            </a>
+                            <button onclick="history.back()" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Назад
+                            </button>
+                        }
+                        else
+                        {
+                            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary">
+                                <i class="fas fa-sign-in-alt me-2"></i>Войти в систему
+                            </a>
+                            <a asp-page="/Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-home me-2"></i>На главную
+                            </a>
+                        }
+                    </div>
+                    
+                    <!-- Справочная информация -->
+                    <div class="mt-5 pt-4 border-top">
+                        <p class="text-muted small mb-2">
+                            <i class="fas fa-question-circle me-2"></i>Нужна помощь?
+                        </p>
+                        <div class="d-flex flex-wrap justify-content-center gap-3">
+                            <a asp-page="/Users/All" class="text-decoration-none small">
+                                <i class="fas fa-users me-1"></i>Пользователи
+                            </a>
+                            <a asp-page="/Articles/All" class="text-decoration-none small">
+                                <i class="fas fa-newspaper me-1"></i>Статьи
+                            </a>
+                            <a asp-page="/Tags/All" class="text-decoration-none small">
+                                <i class="fas fa-tags me-1"></i>Теги
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        /* Анимация для иконки */
+        .error-icon {
+            animation: pulse 2s infinite;
+        }
+        
+        @@keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Дополнительные стили */
+        .card {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+        
+        /* Адаптивность */
+        @@media (max-width: 576px) {
+            .display-4 {
+                font-size: 3rem;
+            }
+            
+            .error-icon i {
+                font-size: 3.5rem !important;
+            }
+            
+            .card-body {
+                padding: 2rem !important;
+            }
+        }
+    </style>
+}

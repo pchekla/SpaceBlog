@@ -1,0 +1,182 @@
+@page "{id:int}"
+@model SpaceBlog.Pages.Tags.DetailsModel
+@{
+    ViewData["Title"] = $"Тег: {Model.Tag.Name}";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Заголовок тега -->
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header text-center text-white py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h2 class="mb-0">
+                        <i class="fas fa-hashtag me-2"></i>@Model.Tag.Name
+                    </h2>
+                    <p class="mb-0 mt-2 opacity-75">@Model.Tag.Slug</p>
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="row text-center mb-4">
+                        <div class="col-md-4">
+                            <div class="stat-item">
+                                <h4 class="text-primary mb-1">@Model.Articles.Count</h4>
+                                <small class="text-muted">Статей</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-item">
+                                <h4 class="text-success mb-1">@Model.Tag.ViewCount</h4>
+                                <small class="text-muted">Просмотров</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-item">
+                                <h4 class="text-info mb-1">@Model.Tag.CreatedAt.ToString("dd.MM.yyyy")</h4>
+                                <small class="text-muted">Создан</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="mb-0">Статьи с тегом "@Model.Tag.Name"</h5>
+                        <a asp-page="/Tags/All" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Назад к тегам
+                        </a>
+                    </div>
+
+                    <!-- Список статей -->
+                    @if (Model.Articles.Any())
+                    {
+                        <div class="row">
+                            @foreach (var article in Model.Articles)
+                            {
+                                <div class="col-lg-6 col-md-12 mb-4">
+                                    <div class="card border-0 shadow-sm h-100 article-card">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="card-title mb-2">
+                                                    <a href="#" class="text-decoration-none text-dark">
+                                                        @article.Title
+                                                    </a>
+                                                </h5>
+                                                @if (article.IsPublished)
+                                                {
+                                                    <span class="badge bg-success">Опубликована</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning text-dark">Черновик</span>
+                                                }
+                                            </div>
+                                            
+                                            @if (!string.IsNullOrEmpty(article.Summary))
+                                            {
+                                                <p class="card-text text-muted small">@article.Summary</p>
+                                            }
+                                            else
+                                            {
+                                                <p class="card-text text-muted small">@article.Content.Substring(0, Math.Min(150, article.Content.Length))...</p>
+                                            }
+                                            
+                                            <div class="row text-muted small mb-3">
+                                                <div class="col-6">
+                                                    <i class="fas fa-user me-1"></i>
+                                                    @article.AuthorName
+                                                </div>
+                                                <div class="col-6">
+                                                    <i class="fas fa-calendar me-1"></i>
+                                                    @article.CreatedAt.ToString("dd.MM.yyyy")
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row text-muted small mb-3">
+                                                <div class="col-6">
+                                                    <i class="fas fa-eye me-1"></i>
+                                                    @article.ViewCount просмотров
+                                                </div>
+                                                <div class="col-6">
+                                                    <i class="fas fa-comments me-1"></i>
+                                                    @article.CommentsCount комментариев
+                                                </div>
+                                            </div>
+                                            
+                                            @if (article.Tags.Any())
+                                            {
+                                                <div class="mb-3">
+                                                    @foreach (var tag in article.Tags.Take(3))
+                                                    {
+                                                        <span class="badge bg-light text-dark me-1">
+                                                            <i class="fas fa-tag me-1"></i>@tag
+                                                        </span>
+                                                    }
+                                                    @if (article.Tags.Count > 3)
+                                                    {
+                                                        <span class="badge bg-light text-dark">
+                                                            +@(article.Tags.Count - 3)
+                                                        </span>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                        
+                                        <div class="card-footer bg-light">
+                                            <a href="#" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-book-open me-1"></i>Читать
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">Статьи не найдены</h4>
+                            <p class="text-muted">С тегом "@Model.Tag.Name" пока нет опубликованных статей</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        /* Custom CSS for tag details page */
+        .article-card {
+            transition: all 0.3s ease;
+        }
+        
+        .article-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+        }
+        
+        .stat-item {
+            padding: 1rem 0;
+        }
+        
+        .badge {
+            font-size: 0.75em;
+            font-weight: 500;
+        }
+        
+        @@media (max-width: 576px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .stat-item {
+                padding: 0.5rem 0;
+            }
+        }
+    </style>
+}

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SpaceBlog.Models;
 
@@ -11,142 +12,133 @@ namespace SpaceBlog.Data
         {
         }
 
-        // DbSets для бизнес-моделей
-        public DbSet<Article> Articles { get; set; }
-        public DbSet<Tag> Tags { get; set; }
-        public DbSet<Comment> Comments { get; set; }
-        public DbSet<ArticleTag> ArticleTags { get; set; }
-        
-        // DbSets для ролей (используются автоматически через IdentityDbContext)
-        // public DbSet<Role> Roles уже наследуется от IdentityDbContext
+        // DbSets для наших моделей
+        public DbSet<Article> Articles { get; set; } = null!;
+        public DbSet<Tag> Tags { get; set; } = null!;
+        public DbSet<Comment> Comments { get; set; } = null!;
+        public DbSet<ArticleTag> ArticleTags { get; set; } = null!;
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(builder);
 
-            // Настройка BlogUser
-            modelBuilder.Entity<BlogUser>(entity =>
+            // Конфигурация BlogUser
+            builder.Entity<BlogUser>(entity =>
             {
-                entity.HasIndex(u => u.DisplayName);
-                entity.Property(u => u.RegistrationDate).HasDefaultValueSql("datetime('now')");
-                
-                // Связь с ролями через IdentityUserRole
-                entity.HasMany(u => u.UserRoles)
-                      .WithOne()
-                      .HasForeignKey(ur => ur.UserId)
-                      .IsRequired();
+                entity.Property(u => u.FirstName).HasMaxLength(100);
+                entity.Property(u => u.LastName).HasMaxLength(100);
+                entity.Property(u => u.Bio).HasMaxLength(1000);
+                entity.Property(u => u.Website).HasMaxLength(200);
+                entity.Property(u => u.Location).HasMaxLength(100);
+                entity.Property(u => u.AvatarUrl).HasMaxLength(500);
             });
 
-            // Настройка Role
-            modelBuilder.Entity<Role>(entity =>
+            // Конфигурация Article
+            builder.Entity<Article>(entity =>
             {
-                entity.HasIndex(r => r.Name).IsUnique();
-                entity.HasIndex(r => r.IsActive);
-                entity.Property(r => r.CreatedAt).HasDefaultValueSql("datetime('now')");
-                
-                // Связь с пользователями через IdentityUserRole
-                entity.HasMany(r => r.UserRoles)
-                      .WithOne()
-                      .HasForeignKey(ur => ur.RoleId)
-                      .IsRequired();
-            });
+                entity.HasKey(a => a.Id);
+                entity.Property(a => a.Title).IsRequired().HasMaxLength(200);
+                entity.Property(a => a.Slug).HasMaxLength(250);
+                entity.Property(a => a.Summary).HasMaxLength(500);
+                entity.Property(a => a.Content).IsRequired();
+                entity.Property(a => a.MetaDescription).HasMaxLength(500);
+                entity.Property(a => a.ImageUrl).HasMaxLength(500);
+                entity.Property(a => a.Keywords).HasMaxLength(200);
 
-            // Настройка Article
-            modelBuilder.Entity<Article>(entity =>
-            {
-                entity.HasIndex(a => a.Title);
+                // Индексы
                 entity.HasIndex(a => a.Slug).IsUnique();
-                entity.HasIndex(a => a.CreatedAt);
                 entity.HasIndex(a => a.IsPublished);
-                
-                entity.Property(a => a.CreatedAt).HasDefaultValueSql("datetime('now')");
-                
+                entity.HasIndex(a => a.CreatedAt);
+
+                // Связи
                 entity.HasOne(a => a.Author)
-                      .WithMany(u => u.Articles)
-                      .HasForeignKey(a => a.AuthorId)
-                      .OnDelete(DeleteBehavior.Restrict);
+                    .WithMany(u => u.Articles)
+                    .HasForeignKey(a => a.AuthorId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasMany(a => a.Comments)
+                    .WithOne(c => c.Article)
+                    .HasForeignKey(c => c.ArticleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasMany(a => a.ArticleTags)
+                    .WithOne(at => at.Article)
+                    .HasForeignKey(at => at.ArticleId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Настройка Tag
-            modelBuilder.Entity<Tag>(entity =>
+            // Конфигурация Tag
+            builder.Entity<Tag>(entity =>
             {
-                entity.HasIndex(t => t.Name).IsUnique();
+                entity.HasKey(t => t.Id);
+                entity.Property(t => t.Name).IsRequired().HasMaxLength(100);
+                entity.Property(t => t.Slug).IsRequired().HasMaxLength(120);
+                entity.Property(t => t.Description).HasMaxLength(500);
+                entity.Property(t => t.Color).HasMaxLength(7);
+
+                // Индексы
                 entity.HasIndex(t => t.Slug).IsUnique();
-                entity.HasIndex(t => t.IsActive);
-                
-                entity.Property(t => t.CreatedAt).HasDefaultValueSql("datetime('now')");
-                
-                entity.HasOne(t => t.CreatedBy)
-                      .WithMany()
-                      .HasForeignKey(t => t.CreatedById)
-                      .OnDelete(DeleteBehavior.SetNull);
+                entity.HasIndex(t => t.Name);
+
+                // Связи
+                entity.HasMany(t => t.ArticleTags)
+                    .WithOne(at => at.Tag)
+                    .HasForeignKey(at => at.TagId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Настройка Comment
-            modelBuilder.Entity<Comment>(entity =>
+            // Конфигурация Comment
+            builder.Entity<Comment>(entity =>
             {
+                entity.HasKey(c => c.Id);
+                entity.Property(c => c.Content).IsRequired().HasMaxLength(1000);
+                entity.Property(c => c.IpAddress).HasMaxLength(45);
+                entity.Property(c => c.UserAgent).HasMaxLength(500);
+                entity.Property(c => c.BlockReason).HasMaxLength(500);
+
+                // Индексы
                 entity.HasIndex(c => c.CreatedAt);
                 entity.HasIndex(c => c.IsApproved);
-                entity.HasIndex(c => c.IsBlocked);
-                
-                entity.Property(c => c.CreatedAt).HasDefaultValueSql("datetime('now')");
-                
+
+                // Связи
                 entity.HasOne(c => c.Article)
-                      .WithMany(a => a.Comments)
-                      .HasForeignKey(c => c.ArticleId)
-                      .OnDelete(DeleteBehavior.Cascade);
-                
+                    .WithMany(a => a.Comments)
+                    .HasForeignKey(c => c.ArticleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
                 entity.HasOne(c => c.Author)
-                      .WithMany(u => u.Comments)
-                      .HasForeignKey(c => c.AuthorId)
-                      .OnDelete(DeleteBehavior.Restrict);
-                
-                entity.HasOne(c => c.ModeratedBy)
-                      .WithMany()
-                      .HasForeignKey(c => c.ModeratedById)
-                      .OnDelete(DeleteBehavior.SetNull);
-                
-                // Настройка для вложенных комментариев
-                entity.HasOne(c => c.ParentComment)
-                      .WithMany(c => c.Replies)
-                      .HasForeignKey(c => c.ParentCommentId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                    .WithMany(u => u.Comments)
+                    .HasForeignKey(c => c.AuthorId)
+                    .OnDelete(DeleteBehavior.SetNull);
             });
 
-            // Настройка связей ArticleTag (many-to-many)
-            modelBuilder.Entity<ArticleTag>(entity =>
+            // Конфигурация ArticleTag (связь многие-ко-многим)
+            builder.Entity<ArticleTag>(entity =>
             {
                 entity.HasKey(at => new { at.ArticleId, at.TagId });
-                
-                entity.HasIndex(at => at.CreatedAt);
-                entity.HasIndex(at => at.Order);
-                
-                entity.Property(at => at.CreatedAt).HasDefaultValueSql("datetime('now')");
-                
+
                 entity.HasOne(at => at.Article)
-                      .WithMany(a => a.ArticleTags)
-                      .HasForeignKey(at => at.ArticleId)
-                      .OnDelete(DeleteBehavior.Cascade);
-                
+                    .WithMany(a => a.ArticleTags)
+                    .HasForeignKey(at => at.ArticleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
                 entity.HasOne(at => at.Tag)
-                      .WithMany(t => t.ArticleTags)
-                      .HasForeignKey(at => at.TagId)
-                      .OnDelete(DeleteBehavior.Cascade);
-                
-                entity.HasOne(at => at.CreatedBy)
-                      .WithMany()
-                      .HasForeignKey(at => at.CreatedById)
-                      .OnDelete(DeleteBehavior.SetNull);
+                    .WithMany(t => t.ArticleTags)
+                    .HasForeignKey(at => at.TagId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Дополнительные настройки для производительности
-            modelBuilder.Entity<Article>()
-                .Navigation(a => a.Comments)
-                .EnableLazyLoading(false);
-            
-            modelBuilder.Entity<Article>()
-                .Navigation(a => a.ArticleTags)
-                .EnableLazyLoading(false);
+            // Конфигурация Role
+            builder.Entity<Role>(entity =>
+            {
+                entity.Property(r => r.Description).HasMaxLength(500);
+            });
+
+            // Убираем дублирующие связи в IdentityUserRole
+            builder.Entity<IdentityUserRole<string>>(entity =>
+            {
+                entity.ToTable("AspNetUserRoles");
+            });
         }
     }
 }

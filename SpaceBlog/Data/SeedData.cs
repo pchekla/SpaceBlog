@@ -1,152 +1,187 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using SpaceBlog.Models;
 
 namespace SpaceBlog.Data
 {
     public static class SeedData
     {
-        public static async Task InitializeAsync(IServiceProvider serviceProvider)
+        public static async Task Initialize(IServiceProvider serviceProvider)
         {
-            using var scope = serviceProvider.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<BlogUser>>();
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
+            using var context = new ApplicationDbContext(
+                serviceProvider.GetRequiredService<DbContextOptions<ApplicationDbContext>>());
 
-            // Создаем роли
+            var userManager = serviceProvider.GetRequiredService<UserManager<BlogUser>>();
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<Role>>();
+
+            // Создаем роли если они не существуют
             await CreateRolesAsync(roleManager);
 
-            // Создаем пользователей
-            await CreateUsersAsync(userManager);
+            // Создаем администратора если он не существует
+            await CreateAdminUserAsync(userManager);
+
+            // Создаем тестовые данные
+            await CreateSampleDataAsync(context, userManager);
         }
 
         private static async Task CreateRolesAsync(RoleManager<Role> roleManager)
         {
-            var roles = new[]
-            {
-                new Role
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Name = Role.Names.Administrator,
-                    NormalizedName = Role.Names.Administrator.ToUpper(),
-                    Description = "Полные права администратора системы",
-                    Priority = 100,
-                    IsActive = true,
-                    CreatedAt = DateTime.Now
-                },
-                new Role
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Name = Role.Names.Moderator,
-                    NormalizedName = Role.Names.Moderator.ToUpper(),
-                    Description = "Права модератора контента",
-                    Priority = 75,
-                    IsActive = true,
-                    CreatedAt = DateTime.Now
-                },
-                new Role
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Name = Role.Names.Author,
-                    NormalizedName = Role.Names.Author.ToUpper(),
-                    Description = "Права автора статей",
-                    Priority = 50,
-                    IsActive = true,
-                    CreatedAt = DateTime.Now
-                },
-                new Role
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    Name = Role.Names.User,
-                    NormalizedName = Role.Names.User.ToUpper(),
-                    Description = "Базовые права пользователя",
-                    Priority = 25,
-                    IsActive = true,
-                    CreatedAt = DateTime.Now
-                }
-            };
+            string[] roleNames = { Role.Names.Administrator, Role.Names.Moderator, Role.Names.Author, Role.Names.User };
 
-            foreach (var role in roles)
+            foreach (var roleName in roleNames)
             {
-                if (!await roleManager.RoleExistsAsync(role.Name!))
+                if (!await roleManager.RoleExistsAsync(roleName))
                 {
+                    var role = new Role
+                    {
+                        Name = roleName,
+                        Description = GetRoleDescription(roleName),
+                        Priority = GetRolePriority(roleName)
+                    };
                     await roleManager.CreateAsync(role);
                 }
             }
         }
 
-        private static async Task CreateUsersAsync(UserManager<BlogUser> userManager)
+        private static async Task CreateAdminUserAsync(UserManager<BlogUser> userManager)
         {
-            // Администратор
-            var admin = new BlogUser
-            {
-                UserName = "admin@spaceblog.com",
-                Email = "admin@spaceblog.com",
-                FirstName = "Админ",
-                LastName = "Админов",
-                DisplayName = "Главный Администратор",
-                Bio = "Администратор блога SpaceBlog",
-                RegistrationDate = DateTime.Now,
-                EmailNotifications = true,
-                IsPublicProfile = true,
-                EmailConfirmed = true
-            };
+            var adminEmail = "admin@spaceblog.com";
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
 
-            if (await userManager.FindByEmailAsync(admin.Email) == null)
+            if (adminUser == null)
             {
-                var result = await userManager.CreateAsync(admin, "Admin123!");
+                adminUser = new BlogUser
+                {
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    EmailConfirmed = true,
+                    FirstName = "Администратор",
+                    LastName = "Системы",
+                    Bio = "Главный администратор блога SpaceBlog",
+                    RegistrationDate = DateTime.UtcNow
+                };
+
+                var result = await userManager.CreateAsync(adminUser, "Admin123!");
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(admin, Role.Names.Administrator);
+                    await userManager.AddToRoleAsync(adminUser, Role.Names.Administrator);
+                }
+            }
+        }
+
+        private static async Task CreateSampleDataAsync(ApplicationDbContext context, UserManager<BlogUser> userManager)
+        {
+            // Создаем тестового автора если его нет
+            var authorEmail = "author@spaceblog.com";
+            var authorUser = await userManager.FindByEmailAsync(authorEmail);
+
+            if (authorUser == null)
+            {
+                authorUser = new BlogUser
+                {
+                    UserName = authorEmail,
+                    Email = authorEmail,
+                    EmailConfirmed = true,
+                    FirstName = "Тестовый",
+                    LastName = "Автор",
+                    Bio = "Автор тестовых статей для демонстрации возможностей блога",
+                    RegistrationDate = DateTime.UtcNow
+                };
+
+                var result = await userManager.CreateAsync(authorUser, "Author123!");
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(authorUser, Role.Names.Author);
                 }
             }
 
-            // Модератор
-            var moderator = new BlogUser
+            // Создаем теги если их нет
+            if (!context.Tags.Any())
             {
-                UserName = "moderator@spaceblog.com",
-                Email = "moderator@spaceblog.com",
-                FirstName = "Модер",
-                LastName = "Модеров",
-                DisplayName = "Главный Модератор",
-                Bio = "Модератор контента блога SpaceBlog",
-                RegistrationDate = DateTime.Now,
-                EmailNotifications = true,
-                IsPublicProfile = true,
-                EmailConfirmed = true
-            };
-
-            if (await userManager.FindByEmailAsync(moderator.Email) == null)
-            {
-                var result = await userManager.CreateAsync(moderator, "Moderator123!");
-                if (result.Succeeded)
+                var tags = new[]
                 {
-                    await userManager.AddToRoleAsync(moderator, Role.Names.Moderator);
-                }
+                    new Tag { Name = "Космос", Slug = "cosmos", Description = "Статьи о космосе и астрономии", Color = "#1e3a8a" },
+                    new Tag { Name = "Технологии", Slug = "tech", Description = "Новые технологии и разработки", Color = "#059669" },
+                    new Tag { Name = "Наука", Slug = "science", Description = "Научные открытия и исследования", Color = "#dc2626" },
+                    new Tag { Name = "Программирование", Slug = "programming", Description = "Разработка ПО и программирование", Color = "#7c3aed" },
+                    new Tag { Name = "Искусственный интеллект", Slug = "ai", Description = "ИИ и машинное обучение", Color = "#ea580c" }
+                };
+
+                context.Tags.AddRange(tags);
+                await context.SaveChangesAsync();
             }
 
-            // Обычный пользователь
-            var user = new BlogUser
+            // Создаем статьи если их нет
+            if (!context.Articles.Any())
             {
-                UserName = "user@spaceblog.com",
-                Email = "user@spaceblog.com",
-                FirstName = "Иван",
-                LastName = "Иванов",
-                DisplayName = "Иван Иванов",
-                Bio = "Обычный пользователь блога SpaceBlog",
-                RegistrationDate = DateTime.Now,
-                EmailNotifications = true,
-                IsPublicProfile = true,
-                EmailConfirmed = true
-            };
-
-            if (await userManager.FindByEmailAsync(user.Email) == null)
-            {
-                var result = await userManager.CreateAsync(user, "User123!");
-                if (result.Succeeded)
+                var tags = await context.Tags.ToListAsync();
+                
+                var articles = new[]
                 {
-                    await userManager.AddToRoleAsync(user, Role.Names.User);
-                }
+                    new Article
+                    {
+                        Title = "Добро пожаловать в SpaceBlog!",
+                        Slug = "welcome-to-spaceblog",
+                        Summary = "Первая статья в нашем космическом блоге",
+                        Content = "<h2>Добро пожаловать!</h2><p>Это первая статья в нашем блоге о космосе, технологиях и науке. Здесь мы будем делиться интересными фактами, новостями и исследованиями.</p>",
+                        AuthorId = authorUser!.Id,
+                        IsPublished = true,
+                        CreatedAt = DateTime.UtcNow.AddDays(-10),
+                        ViewCount = 150
+                    },
+                    new Article
+                    {
+                        Title = "Исследование Марса: новые горизонты",
+                        Slug = "mars-exploration-new-horizons",
+                        Summary = "Обзор последних достижений в исследовании красной планеты",
+                        Content = "<h2>Красная планета</h2><p>Марс продолжает удивлять ученых своими тайнами. В этой статье мы рассмотрим последние открытия...</p>",
+                        AuthorId = authorUser!.Id,
+                        IsPublished = true,
+                        CreatedAt = DateTime.UtcNow.AddDays(-5),
+                        ViewCount = 89
+                    }
+                };
+
+                context.Articles.AddRange(articles);
+                await context.SaveChangesAsync();
+
+                // Добавляем теги к статьям
+                var article1 = articles[0];
+                var article2 = articles[1];
+                
+                context.ArticleTags.AddRange(
+                    new ArticleTag { ArticleId = article1.Id, TagId = tags.First(t => t.Slug == "cosmos").Id },
+                    new ArticleTag { ArticleId = article1.Id, TagId = tags.First(t => t.Slug == "tech").Id },
+                    new ArticleTag { ArticleId = article2.Id, TagId = tags.First(t => t.Slug == "cosmos").Id },
+                    new ArticleTag { ArticleId = article2.Id, TagId = tags.First(t => t.Slug == "science").Id }
+                );
+
+                await context.SaveChangesAsync();
             }
+        }
+
+        private static string GetRoleDescription(string roleName)
+        {
+            return roleName switch
+            {
+                Role.Names.Administrator => "Полные права администратора системы",
+                Role.Names.Moderator => "Права модератора для управления контентом",
+                Role.Names.Author => "Права автора для создания статей",
+                Role.Names.User => "Стандартные права пользователя",
+                _ => "Пользовательская роль"
+            };
+        }
+
+        private static int GetRolePriority(string roleName)
+        {
+            return roleName switch
+            {
+                Role.Names.Administrator => 100,
+                Role.Names.Moderator => 75,
+                Role.Names.Author => 50,
+                Role.Names.User => 25,
+                _ => 0
+            };
         }
     }
 }

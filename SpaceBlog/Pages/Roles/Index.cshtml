@@ -1,0 +1,173 @@
+@page
+@model SpaceBlog.Pages.Roles.IndexModel
+@{
+    ViewData["Title"] = "Управление ролями";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Заголовок с градиентом -->
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header text-center text-white py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h2 class="mb-0">
+                        <i class="fas fa-user-shield me-2"></i>Управление ролями
+                    </h2>
+                    <p class="mb-0 mt-2 opacity-75">Все роли пользователей в системе</p>
+                </div>
+
+                <div class="card-body p-4">
+                    <!-- Статус сообщение -->
+                    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>@Model.StatusMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <!-- Кнопка добавления новой роли -->
+                    <div class="text-center mb-4">
+                        <a asp-page="./Create" class="btn btn-lg text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                            <i class="fas fa-plus me-2"></i>Добавить новую роль
+                        </a>
+                    </div>
+
+                    <!-- Список ролей -->
+                    @if (Model.Roles.Any())
+                    {
+                        <div class="row">
+                            @foreach (var role in Model.Roles)
+                            {
+                                <div class="col-lg-6 col-md-12 mb-3">
+                                    <div class="card border-0 shadow-sm h-100">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="card-title mb-0">
+                                                    <i class="fas fa-user-shield text-primary me-2"></i>@role.Name
+                                                </h5>
+                                                <span class="badge @(role.IsActive ? "bg-success" : "bg-secondary")">
+                                                    @(role.IsActive ? "Активна" : "Неактивна")
+                                                </span>
+                                            </div>
+                                            
+                                            <p class="card-text text-muted">@role.Description</p>
+                                            
+                                            <div class="row text-muted small mb-3">
+                                                <div class="col-6">
+                                                    <i class="fas fa-calendar me-1"></i>
+                                                    Создана: @role.CreatedAt.ToString("dd.MM.yyyy")
+                                                </div>
+                                                <div class="col-6">
+                                                    <i class="fas fa-sort-numeric-up me-1"></i>
+                                                    Приоритет: @role.Priority
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <span class="text-muted small">
+                                                        <i class="fas fa-users me-1"></i>
+                                                        Пользователей: @role.UserCount
+                                                    </span>
+                                                </div>
+                                                <div>
+                                                    <a asp-page="./Edit" asp-route-id="@role.Id" class="btn btn-outline-primary btn-sm me-2">
+                                                        <i class="fas fa-edit me-1"></i>Изменить
+                                                    </a>
+                                                    @if (role.UserCount == 0 && !role.IsSystemRole)
+                                                    {
+                                                        <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                                onclick="confirmDelete('@role.Id', '@role.Name')">
+                                                            <i class="fas fa-trash me-1"></i>Удалить
+                                                        </button>
+                                                    }
+                                                    else if (role.IsSystemRole)
+                                                    {
+                                                        <span class="text-muted small">Системная роль</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-user-shield fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">Роли не найдены</h4>
+                            <p class="text-muted">Создайте первую роль для управления правами пользователей</p>
+                            <a asp-page="./Create" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Создать первую роль
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для подтверждения удаления -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>Подтверждение удаления
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить роль <strong id="roleNameToDelete"></strong>?</p>
+                <p class="text-muted small">Это действие нельзя отменить.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Отмена
+                </button>
+                <form id="deleteForm" method="post" asp-page-handler="Delete" class="d-inline">
+                    <input type="hidden" id="roleIdToDelete" name="id" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i>Удалить
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(roleId, roleName) {
+            document.getElementById('roleIdToDelete').value = roleId;
+            document.getElementById('roleNameToDelete').textContent = roleName;
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        }
+    </script>
+    
+    <style>
+        /* Custom CSS for roles index page */
+        .card {
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        @@media (max-width: 576px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+        }
+    </style>
+}

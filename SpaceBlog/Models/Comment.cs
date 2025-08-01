@@ -18,8 +18,7 @@ namespace SpaceBlog.Models
         [Display(Name = "Дата обновления")]
         public DateTime? UpdatedAt { get; set; }
 
-        [Required]
-        public string AuthorId { get; set; } = string.Empty;
+        public string? AuthorId { get; set; }
         public BlogUser? Author { get; set; }
 
         [Required]
@@ -100,12 +99,12 @@ namespace SpaceBlog.Models
 
         public bool CanBeEditedBy(string userId)
         {
-            return AuthorId == userId && (DateTime.Now - CreatedAt).TotalMinutes <= 15;
+            return !string.IsNullOrEmpty(AuthorId) && AuthorId == userId && (DateTime.Now - CreatedAt).TotalMinutes <= 15;
         }
 
         public bool CanBeDeletedBy(string userId, IList<string> userRoles)
         {
-            return AuthorId == userId || 
+            return (!string.IsNullOrEmpty(AuthorId) && AuthorId == userId) || 
                    userRoles.Contains(Role.Names.Moderator) || 
                    userRoles.Contains(Role.Names.Administrator);
         }

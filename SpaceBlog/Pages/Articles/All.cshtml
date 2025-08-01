@@ -1,0 +1,250 @@
+@page
+@model SpaceBlog.Pages.Articles.AllModel
+@{
+    ViewData["Title"] = "Все статьи";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Заголовок с градиентом -->
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header text-center text-white py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h2 class="mb-0">
+                        <i class="fas fa-newspaper me-2"></i>Все статьи
+                    </h2>
+                    <p class="mb-0 mt-2 opacity-75">Публикации блога SpaceBlog</p>
+                </div>
+
+                <div class="card-body p-4">
+                    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+                    {
+                        <div class="alert alert-info alert-dismissible fade show" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>@Model.StatusMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <!-- Добавить статью -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h5 class="mb-0">Всего статей: @Model.Articles.Count</h5>
+                            <small class="text-muted">Опубликованные статьи в блоге</small>
+                        </div>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <a asp-page="/Articles/Create" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Добавить статью
+                            </a>
+                        }
+                    </div>
+
+                    <!-- Список статей -->
+                    @if (Model.Articles.Any())
+                    {
+                        <div class="row">
+                            @foreach (var article in Model.Articles)
+                            {
+                                <div class="col-lg-6 col-md-12 mb-4">
+                                    <div class="card border-0 shadow-sm h-100 article-card">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <div class="flex-grow-1">
+                                                    <h5 class="card-title mb-2">
+                                                        <a asp-page="/Articles/Details" asp-route-id="@article.Id" class="text-decoration-none text-dark">
+                                                            @article.Title
+                                                        </a>
+                                                    </h5>
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-user me-1"></i>
+                                                            <a asp-page="/Users/Details" asp-route-id="@article.AuthorId" 
+                                                               class="text-decoration-none text-muted">@article.AuthorName</a>
+                                                        </small>
+                                                        <span class="mx-2 text-muted">•</span>
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-calendar me-1"></i>@article.CreatedAt.ToString("dd.MM.yyyy")
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex flex-column align-items-end">
+                                                    @if (article.IsPublished)
+                                                    {
+                                                        <span class="badge bg-success mb-1">Опубликована</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-warning text-dark mb-1">Черновик</span>
+                                                    }
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-eye me-1"></i>@article.ViewCount
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            
+                                            @if (!string.IsNullOrEmpty(article.Summary))
+                                            {
+                                                <p class="card-text text-muted mb-3">@article.Summary</p>
+                                            }
+                                            else if (!string.IsNullOrEmpty(article.Content))
+                                            {
+                                                <p class="card-text text-muted mb-3">
+                                                    @(article.Content.Length > 150 ? article.Content.Substring(0, 150) + "..." : article.Content)
+                                                </p>
+                                            }
+                                            
+                                            <!-- Теги статьи -->
+                                            @if (article.Tags.Any())
+                                            {
+                                                <div class="mb-3">
+                                                    @foreach (var tag in article.Tags)
+                                                    {
+                                                        <a asp-page="/Tags/Details" asp-route-id="@tag.Id" class="badge bg-light text-dark text-decoration-none me-1 mb-1">
+                                                            <i class="fas fa-tag me-1"></i>@tag.Name
+                                                        </a>
+                                                    }
+                                                </div>
+                                            }
+                                            
+                                            <div class="row text-muted small mb-3">
+                                                <div class="col-6">
+                                                    <i class="fas fa-comments me-1"></i>
+                                                    @article.CommentsCount комментариев
+                                                </div>
+                                                @if (article.UpdatedAt.HasValue && article.UpdatedAt != article.CreatedAt)
+                                                {
+                                                    <div class="col-6">
+                                                        <i class="fas fa-edit me-1"></i>
+                                                        Изменена @article.UpdatedAt.Value.ToString("dd.MM.yyyy")
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="card-footer bg-light d-flex justify-content-between align-items-center">
+                                            <a asp-page="/Articles/Details" asp-route-id="@article.Id" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-book-open me-1"></i>Читать
+                                            </a>
+                                            
+                                            @if (User.Identity?.IsAuthenticated == true)
+                                            {
+                                                <div>
+                                                    @if (Model.CanEditArticle(article.AuthorId))
+                                                    {
+                                                        <a asp-page="/Articles/Edit" asp-route-id="@article.Id" class="btn btn-outline-secondary btn-sm me-1">
+                                                            <i class="fas fa-edit me-1"></i>Изменить
+                                                        </a>
+                                                    }
+                                                    @if (Model.CanDeleteArticle(article.AuthorId))
+                                                    {
+                                                        <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                                onclick="confirmDelete('@article.Id', '@article.Title')">
+                                                            <i class="fas fa-trash me-1"></i>Удалить
+                                                        </button>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">Статьи не найдены</h4>
+                            <p class="text-muted">В блоге пока нет опубликованных статей</p>
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <a asp-page="/Articles/Create" class="btn btn-primary mt-3">
+                                    <i class="fas fa-plus me-2"></i>Написать первую статью
+                                </a>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для удаления статьи -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>Подтверждение удаления
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить статью <strong id="articleTitleToDelete"></strong>?</p>
+                <p class="text-muted small">Это действие нельзя отменить. Все комментарии к статье также будут удалены.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Отмена
+                </button>
+                <form id="deleteForm" method="post" asp-page-handler="Delete" class="d-inline">
+                    <input type="hidden" id="articleIdToDelete" name="id" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i>Удалить
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDelete(articleId, articleTitle) {
+            document.getElementById('articleIdToDelete').value = articleId;
+            document.getElementById('articleTitleToDelete').textContent = articleTitle;
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        }
+    </script>
+    
+    <style>
+        /* Custom CSS for all articles page */
+        .article-card {
+            transition: all 0.3s ease;
+            border: 1px solid #e3e6f0 !important;
+        }
+        
+        .article-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+            border-color: #667eea !important;
+        }
+        
+        .badge {
+            font-size: 0.75em;
+            font-weight: 500;
+        }
+        
+        .badge.bg-light:hover {
+            background-color: #667eea !important;
+            color: white !important;
+        }
+        
+        @@media (max-width: 576px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .card-footer {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+}

@@ -1,0 +1,159 @@
+@page "{id}"
+@model SpaceBlog.Pages.Users.EditModel
+@{
+    ViewData["Title"] = "Редактирование пользователя";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10 col-sm-12">
+            <div class="card shadow-lg border-0">
+                <!-- Заголовок с градиентом -->
+                <div class="card-header text-center text-white py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.5rem 0.5rem 0 0;">
+                    <h2 class="mb-0">
+                        <i class="fas fa-user-edit me-2"></i>Редактирование пользователя
+                    </h2>
+                    <p class="mb-0 mt-2 opacity-75">Измените информацию о пользователе и его роли</p>
+                </div>
+
+                <div class="card-body p-4">
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        
+                        <!-- Выбор ролей -->
+                        @if (Model.AvailableRoles.Any())
+                        {
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-muted mb-3">
+                                    <i class="fas fa-user-shield me-2"></i>Выберите роли для пользователя:
+                                </label>
+                                <div class="row">
+                                    @for (int i = 0; i < Model.AvailableRoles.Count; i++)
+                                    {
+                                        <div class="col-lg-4 col-md-6 col-sm-12 mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" 
+                                                       asp-for="SelectedRoleIds" value="@Model.AvailableRoles[i].Id" 
+                                                       id="role_@Model.AvailableRoles[i].Id"
+                                                       checked="@Model.SelectedRoleIds.Contains(Model.AvailableRoles[i].Id)" />
+                                                <label class="form-check-label" for="role_@Model.AvailableRoles[i].Id">
+                                                    @Model.AvailableRoles[i].DisplayName
+                                                </label>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                <span asp-validation-for="SelectedRoleIds" class="text-danger"></span>
+                            </div>
+                        }
+                        
+                        <!-- Имя -->
+                        <div class="form-floating mb-4">
+                            <input asp-for="Input.FirstName" class="form-control" autocomplete="off" aria-required="true" placeholder="Введите имя" />
+                            <label asp-for="Input.FirstName" class="text-muted">
+                                <i class="fas fa-user me-1"></i>Имя
+                            </label>
+                            <span asp-validation-for="Input.FirstName" class="text-danger"></span>
+                        </div>
+                        
+                        <!-- Фамилия -->
+                        <div class="form-floating mb-4">
+                            <input asp-for="Input.LastName" class="form-control" autocomplete="off" aria-required="true" placeholder="Введите фамилию" />
+                            <label asp-for="Input.LastName" class="text-muted">
+                                <i class="fas fa-user me-1"></i>Фамилия
+                            </label>
+                            <span asp-validation-for="Input.LastName" class="text-danger"></span>
+                        </div>
+                        
+                        <!-- E-mail -->
+                        <div class="form-floating mb-4">
+                            <input asp-for="Input.Email" class="form-control" autocomplete="off" aria-required="true" placeholder="Введите email" />
+                            <label asp-for="Input.Email" class="text-muted">
+                                <i class="fas fa-envelope me-1"></i>E-mail
+                            </label>
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        </div>
+                        
+                        <!-- Пароль -->
+                        <div class="form-floating mb-4">
+                            <input asp-for="Input.Password" class="form-control" autocomplete="off" placeholder="Введите новый пароль (оставьте пустым, чтобы не менять)" />
+                            <label asp-for="Input.Password" class="text-muted">
+                                <i class="fas fa-lock me-1"></i>Пароль (необязательно)
+                            </label>
+                            <span asp-validation-for="Input.Password" class="text-danger"></span>
+                        </div>
+                        
+                        <!-- Кнопка сохранения -->
+                        <div class="d-grid mb-4">
+                            <button type="submit" class="btn btn-lg text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                                <i class="fas fa-save me-2"></i>Сохранить
+                            </button>
+                        </div>
+                        
+                        <!-- Ссылка на список -->
+                        <div class="text-center">
+                            <a asp-page="./Index" class="text-decoration-none fw-semibold" style="color: #667eea;">
+                                <i class="fas fa-list me-1"></i>Вернуться к списку пользователей
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Футер карточки -->
+                <div class="card-footer text-center py-3" style="background-color: #f8f9fa; border-radius: 0 0 0.5rem 0.5rem;">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Изменения ролей применяются немедленно
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <style>
+        /* Custom CSS for edit user page */
+        .card {
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label {
+            color: #667eea !important;
+        }
+        
+        .form-floating > .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .form-check-input:checked {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+        
+        .form-check-input:focus {
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        @@media (max-width: 576px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .card-header h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+}

@@ -1,26 +1,57 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
+@using SpaceBlog.Models
+@inject SignInManager<BlogUser> SignInManager
+@inject UserManager<BlogUser> UserManager
+
+@{
+    // Получаем текущего пользователя асинхронно
+    var currentUser = await UserManager.GetUserAsync(User);
+    var displayName = currentUser?.GetDisplayName() ?? User.Identity?.Name ?? "Пользователь";
+}
 
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
-    <li class="nav-item">
-        <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
-    </li>
-    <li class="nav-item">
-        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })">
-            <button  type="submit" class="nav-link btn btn-link text-dark">Logout</button>
-        </form>
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-user-circle me-1"></i>
+            @displayName
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" asp-page="/Users/Details" asp-route-id="@UserManager.GetUserId(User)">
+                <i class="fas fa-user me-2"></i>Мой профиль
+            </a></li>
+            <li><a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
+                <i class="fas fa-cog me-2"></i>Настройки профиля
+            </a></li>
+            @if (User.IsInRole(SpaceBlog.Models.Role.Names.Administrator) || User.IsInRole(SpaceBlog.Models.Role.Names.Moderator))
+            {
+                <li><a class="dropdown-item" href="/api/docs" target="_blank">
+                    <i class="fas fa-code me-2"></i>API панель
+                </a></li>
+            }
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <form class="d-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })">
+                    <button type="submit" class="dropdown-item text-danger">
+                        <i class="fas fa-sign-out-alt me-2"></i>Выйти
+                    </button>
+                </form>
+            </li>
+        </ul>
     </li>
 }
 else
 {
     <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
+        <a class="nav-link text-white" asp-area="Identity" asp-page="/Account/Register">
+            <i class="fas fa-user-plus me-1"></i>Регистрация
+        </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
+        <a class="btn btn-outline-light ms-2" asp-area="Identity" asp-page="/Account/Login">
+            <i class="fas fa-sign-in-alt me-1"></i>Войти
+        </a>
     </li>
 }
 </ul>

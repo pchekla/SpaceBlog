@@ -1,0 +1,263 @@
+@page "/Error/500"
+@model SpaceBlog.Pages.Error.ServerErrorModel
+@{
+    ViewData["Title"] = "Внутренняя ошибка сервера";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center" 
+     style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);">
+    <div class="row w-100 justify-content-center">
+        <div class="col-lg-6 col-md-8 col-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-body text-center p-5">
+                    <!-- Анимированная иконка -->
+                    <div class="error-animation mb-4">
+                        <div class="server-icon">
+                            <i class="fas fa-server text-danger" style="font-size: 4rem;"></i>
+                            <div class="error-sparks">
+                                <i class="fas fa-bolt spark spark-1"></i>
+                                <i class="fas fa-bolt spark spark-2"></i>
+                                <i class="fas fa-bolt spark spark-3"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Заголовок -->
+                    <h1 class="display-4 fw-bold text-danger mb-3">500</h1>
+                    <h2 class="h3 mb-4 text-dark">Что-то пошло не так</h2>
+                    
+                    <!-- Описание -->
+                    <div class="alert alert-light border-start border-danger border-4 mb-4">
+                        <p class="mb-2 fw-semibold">На сервере произошла внутренняя ошибка</p>
+                        <p class="mb-0 text-muted">
+                            Наши разработчики уже уведомлены о проблеме и работают над её устранением
+                        </p>
+                    </div>
+                    
+                    <!-- Информация об ошибке -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3">
+                            <div class="info-card">
+                                <i class="fas fa-clock text-warning fa-2x mb-2"></i>
+                                <h6>Время ошибки</h6>
+                                <small class="text-muted">@DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss")</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="info-card">
+                                <i class="fas fa-hashtag text-info fa-2x mb-2"></i>
+                                <h6>Код ошибки</h6>
+                                <small class="text-muted">@Model.ErrorId</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Что можно сделать -->
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h6 class="card-title text-start">
+                                <i class="fas fa-tools me-2"></i>Что можно попробовать:
+                            </h6>
+                            <ul class="list-unstyled text-start mb-0">
+                                <li class="mb-2">
+                                    <i class="fas fa-redo text-primary me-2"></i>
+                                    Обновить страницу (иногда помогает)
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-clock text-warning me-2"></i>
+                                    Подождать несколько минут и попробовать снова
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-home text-success me-2"></i>
+                                    Вернуться на главную страницу
+                                </li>
+                                <li class="mb-0">
+                                    <i class="fas fa-envelope text-info me-2"></i>
+                                    Сообщить администратору, если проблема повторяется
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Действия -->
+                    <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center mb-4">
+                        <button onclick="location.reload()" class="btn btn-primary btn-lg">
+                            <i class="fas fa-redo me-2"></i>Попробовать снова
+                        </button>
+                        <a asp-page="/Index" class="btn btn-success btn-lg">
+                            <i class="fas fa-home me-2"></i>На главную
+                        </a>
+                        <button onclick="history.back()" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-arrow-left me-2"></i>Назад
+                        </button>
+                    </div>
+                    
+                    <!-- Статус системы -->
+                    <div class="alert alert-info">
+                        <div class="d-flex align-items-center justify-content-center">
+                            <div class="status-indicator me-3">
+                                <div class="status-dot"></div>
+                            </div>
+                            <div>
+                                <strong>Статус системы:</strong> Мы работаем над устранением проблемы
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Дополнительная информация -->
+                    <div class="mt-4 pt-4 border-top">
+                        <p class="text-muted small mb-2">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            Ваши данные в безопасности. Ошибка носит временный характер.
+                        </p>
+                        @if (Model.ShowTechnicalDetails)
+                        {
+                            <details class="mt-3">
+                                <summary class="text-muted small" style="cursor: pointer;">
+                                    <i class="fas fa-code me-1"></i>Техническая информация
+                                </summary>
+                                <div class="mt-2 p-3 bg-light rounded">
+                                    <code class="small">
+                                        Идентификатор ошибки: @Model.ErrorId<br>
+                                        Время: @Model.ErrorTime<br>
+                                        User-Agent: @Model.UserAgent
+                                    </code>
+                                </div>
+                            </details>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        /* Анимация сервера */
+        .error-animation {
+            position: relative;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .server-icon {
+            position: relative;
+            animation: shake 0.5s ease-in-out infinite alternate;
+        }
+        
+        .error-sparks {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        
+        .spark {
+            position: absolute;
+            color: #ffd700;
+            font-size: 1rem;
+            animation: sparkle 1s ease-in-out infinite;
+        }
+        
+        .spark-1 {
+            top: -10px;
+            right: -15px;
+            animation-delay: 0s;
+        }
+        
+        .spark-2 {
+            bottom: -10px;
+            left: -15px;
+            animation-delay: 0.3s;
+        }
+        
+        .spark-3 {
+            top: 50%;
+            right: -20px;
+            animation-delay: 0.6s;
+        }
+        
+        @@keyframes shake {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(4px); }
+        }
+        
+        @@keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+        
+        /* Информационные карточки */
+        .info-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Индикатор статуса */
+        .status-indicator {
+            display: flex;
+            align-items: center;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            background: #ffc107;
+            border-radius: 50%;
+            animation: pulse-status 2s infinite;
+        }
+        
+        @@keyframes pulse-status {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        /* Основные стили */
+        .card {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+        
+        /* Адаптивность */
+        @@media (max-width: 768px) {
+            .display-4 {
+                font-size: 3rem;
+            }
+            
+            .error-animation {
+                height: 80px;
+            }
+            
+            .server-icon i {
+                font-size: 2.5rem !important;
+            }
+            
+            .card-body {
+                padding: 2rem !important;
+            }
+        }
+        
+        @@media (max-width: 576px) {
+            .d-flex.flex-sm-row {
+                flex-direction: column !important;
+            }
+            
+            .btn-lg {
+                font-size: 1rem;
+                padding: 0.75rem 1rem;
+            }
+            
+            .info-card {
+                padding: 0.75rem;
+            }
+        }
+    </style>
+}

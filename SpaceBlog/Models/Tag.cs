@@ -42,8 +42,15 @@ namespace SpaceBlog.Models
         public string? CreatedById { get; set; }
         public BlogUser? CreatedBy { get; set; }
 
+        [Display(Name = "Количество просмотров")]
+        public int ViewCount { get; set; } = 0;
+
         // Навигационные свойства
         public virtual ICollection<ArticleTag> ArticleTags { get; set; } = new List<ArticleTag>();
+
+        // Вычисляемое свойство для количества использований
+        [NotMapped]
+        public int UsageCount => ArticleTags?.Count ?? 0;
 
         // Вычисляемые свойства
         [NotMapped]

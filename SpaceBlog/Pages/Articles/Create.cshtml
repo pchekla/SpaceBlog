@@ -1,0 +1,152 @@
+@page
+@model SpaceBlog.Pages.Articles.CreateModel
+@{
+    ViewData["Title"] = "Добавление статьи";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10 col-sm-12">
+            <div class="card shadow-lg border-0">
+                <!-- Заголовок с градиентом -->
+                <div class="card-header text-center text-white py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.5rem 0.5rem 0 0;">
+                    <h2 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>Добавление статьи
+                    </h2>
+                    <p class="mb-0 mt-2 opacity-75">Создайте новую статью для блога</p>
+                </div>
+
+                <div class="card-body p-4">
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        
+                        <!-- Выбор тегов -->
+                        @if (Model.AvailableTags.Any())
+                        {
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-muted mb-3">
+                                    <i class="fas fa-tags me-2"></i>Выберите теги для статьи:
+                                </label>
+                                <div class="row">
+                                    @for (int i = 0; i < Model.AvailableTags.Count; i++)
+                                    {
+                                        <div class="col-lg-4 col-md-6 col-sm-12 mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" 
+                                                       asp-for="SelectedTagIds" value="@Model.AvailableTags[i].Id" 
+                                                       id="tag_@Model.AvailableTags[i].Id" />
+                                                <label class="form-check-label" for="tag_@Model.AvailableTags[i].Id">
+                                                    @Model.AvailableTags[i].Name
+                                                </label>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                <span asp-validation-for="SelectedTagIds" class="text-danger"></span>
+                            </div>
+                        }
+                        
+                        <!-- Заголовок -->
+                        <div class="form-floating mb-4">
+                            <input asp-for="Input.Title" class="form-control" autocomplete="off" aria-required="true" placeholder="Введите заголовок статьи" />
+                            <label asp-for="Input.Title" class="text-muted">
+                                <i class="fas fa-heading me-1"></i>Заголовок
+                            </label>
+                            <span asp-validation-for="Input.Title" class="text-danger"></span>
+                        </div>
+                        
+                        <!-- Краткое содержание -->
+                        <div class="form-floating mb-4">
+                            <textarea asp-for="Input.Summary" class="form-control" style="height: 100px;" autocomplete="off" placeholder="Введите краткое содержание статьи"></textarea>
+                            <label asp-for="Input.Summary" class="text-muted">
+                                <i class="fas fa-align-left me-1"></i>Краткое содержание (необязательно)
+                            </label>
+                            <span asp-validation-for="Input.Summary" class="text-danger"></span>
+                        </div>
+                        
+                        <!-- Контент -->
+                        <div class="form-floating mb-4">
+                            <textarea asp-for="Input.Content" class="form-control" style="height: 200px;" autocomplete="off" aria-required="true" placeholder="Введите содержание статьи"></textarea>
+                            <label asp-for="Input.Content" class="text-muted">
+                                <i class="fas fa-file-text me-1"></i>Контент
+                            </label>
+                            <span asp-validation-for="Input.Content" class="text-danger"></span>
+                        </div>
+                        
+                        <!-- Кнопка добавления -->
+                        <div class="d-grid mb-4">
+                            <button type="submit" class="btn btn-lg text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                                <i class="fas fa-plus me-2"></i>Добавить
+                            </button>
+                        </div>
+                        
+                        <!-- Ссылка на список -->
+                        <div class="text-center">
+                            <a asp-page="./Index" class="text-decoration-none fw-semibold" style="color: #667eea;">
+                                <i class="fas fa-list me-1"></i>Вернуться к списку всех статей
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Футер карточки -->
+                <div class="card-footer text-center py-3" style="background-color: #f8f9fa; border-radius: 0 0 0.5rem 0.5rem;">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Статьи будут опубликованы после добавления
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <style>
+        /* Custom CSS for create article page */
+        .card {
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label,
+        .form-floating > textarea:focus ~ label,
+        .form-floating > textarea:not(:placeholder-shown) ~ label {
+            color: #667eea !important;
+        }
+        
+        .form-floating > .form-control:focus,
+        .form-floating > textarea:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .form-check-input:checked {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+        
+        .form-check-input:focus {
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        @@media (max-width: 576px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .card-header h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+}

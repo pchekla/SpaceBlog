@@ -1,0 +1,226 @@
+@page
+@model SpaceBlog.Pages.Users.IndexModel
+@{
+    ViewData["Title"] = "Управление пользователями";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Заголовок с градиентом -->
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header text-center text-white py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h2 class="mb-0">
+                        <i class="fas fa-users me-2"></i>Управление пользователями
+                    </h2>
+                    <p class="mb-0 mt-2 opacity-75">Все пользователи системы</p>
+                </div>
+
+                <div class="card-body p-4">
+                    <!-- Статус сообщение -->
+                    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>@Model.StatusMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <!-- Список пользователей -->
+                    @if (Model.Users.Any())
+                    {
+                        <div class="row">
+                            @foreach (var user in Model.Users)
+                            {
+                                <div class="col-lg-6 col-md-12 mb-4">
+                                    <div class="card border-0 shadow-sm h-100">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="card-title mb-0">
+                                                    <i class="fas fa-user text-primary me-2"></i>@user.DisplayName
+                                                </h5>
+                                                <span class="badge @(user.IsBanned ? "bg-danger" : "bg-success")">
+                                                    @(user.IsBanned ? "Заблокирован" : "Активен")
+                                                </span>
+                                            </div>
+                                            
+                                            <p class="card-text text-muted">
+                                                <i class="fas fa-envelope me-1"></i>@user.Email
+                                            </p>
+                                            
+                                            <div class="row text-muted small mb-3">
+                                                <div class="col-6">
+                                                    <i class="fas fa-calendar me-1"></i>
+                                                    Регистрация: @user.RegistrationDate.ToString("dd.MM.yyyy")
+                                                </div>
+                                                <div class="col-6">
+                                                    <i class="fas fa-newspaper me-1"></i>
+                                                    Статей: @user.ArticlesCount
+                                                </div>
+                                            </div>
+                                            
+                                            @if (user.Roles.Any())
+                                            {
+                                                <div class="mb-3">
+                                                    @foreach (var role in user.Roles)
+                                                    {
+                                                        <span class="badge bg-light text-dark me-1">
+                                                            <i class="fas fa-user-shield me-1"></i>@role
+                                                        </span>
+                                                    }
+                                                </div>
+                                            }
+                                            
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    @if (user.LastLoginDate.HasValue)
+                                                    {
+                                                        <span class="text-muted small">
+                                                            <i class="fas fa-clock me-1"></i>
+                                                            Последний вход: @user.LastLoginDate.Value.ToString("dd.MM.yyyy")
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted small">
+                                                            <i class="fas fa-clock me-1"></i>
+                                                            Не входил
+                                                        </span>
+                                                    }
+                                                </div>
+                                                <div>
+                                                    <a asp-page="./Edit" asp-route-id="@user.Id" class="btn btn-outline-primary btn-sm me-2">
+                                                        <i class="fas fa-edit me-1"></i>Изменить
+                                                    </a>
+                                                    @if (!user.IsBanned)
+                                                    {
+                                                        <button type="button" class="btn btn-outline-warning btn-sm" 
+                                                                onclick="confirmBan('@user.Id', '@user.DisplayName')">
+                                                            <i class="fas fa-ban me-1"></i>Заблокировать
+                                                        </button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button type="button" class="btn btn-outline-success btn-sm" 
+                                                                onclick="confirmUnban('@user.Id', '@user.DisplayName')">
+                                                            <i class="fas fa-check me-1"></i>Разблокировать
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <h4 class="text-muted">Пользователи не найдены</h4>
+                            <p class="text-muted">В системе пока нет зарегистрированных пользователей</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для блокировки -->
+<div class="modal fade" id="banModal" tabindex="-1" aria-labelledby="banModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="banModalLabel">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>Подтверждение блокировки
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите заблокировать пользователя <strong id="userNameToBan"></strong>?</p>
+                <p class="text-muted small">Пользователь не сможет войти в систему.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Отмена
+                </button>
+                <form id="banForm" method="post" asp-page-handler="Ban" class="d-inline">
+                    <input type="hidden" id="userIdToBan" name="id" />
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-ban me-1"></i>Заблокировать
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для разблокировки -->
+<div class="modal fade" id="unbanModal" tabindex="-1" aria-labelledby="unbanModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="unbanModalLabel">
+                    <i class="fas fa-check text-success me-2"></i>Подтверждение разблокировки
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите разблокировать пользователя <strong id="userNameToUnban"></strong>?</p>
+                <p class="text-muted small">Пользователь сможет снова войти в систему.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Отмена
+                </button>
+                <form id="unbanForm" method="post" asp-page-handler="Unban" class="d-inline">
+                    <input type="hidden" id="userIdToUnban" name="id" />
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check me-1"></i>Разблокировать
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmBan(userId, userName) {
+            document.getElementById('userIdToBan').value = userId;
+            document.getElementById('userNameToBan').textContent = userName;
+            var banModal = new bootstrap.Modal(document.getElementById('banModal'));
+            banModal.show();
+        }
+
+        function confirmUnban(userId, userName) {
+            document.getElementById('userIdToUnban').value = userId;
+            document.getElementById('userNameToUnban').textContent = userName;
+            var unbanModal = new bootstrap.Modal(document.getElementById('unbanModal'));
+            unbanModal.show();
+        }
+    </script>
+    
+    <style>
+        /* Custom CSS for users index page */
+        .card {
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        @@media (max-width: 576px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+        }
+    </style>
+}
