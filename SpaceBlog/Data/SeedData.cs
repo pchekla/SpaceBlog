@@ -14,14 +14,20 @@ namespace SpaceBlog.Data
             var userManager = serviceProvider.GetRequiredService<UserManager<BlogUser>>();
             var roleManager = serviceProvider.GetRequiredService<RoleManager<Role>>();
 
-            // Создаем роли если они не существуют
-            await CreateRolesAsync(roleManager);
+        // Создаем роли если они не существуют
+        await CreateRolesAsync(roleManager);
 
-            // Создаем администратора если он не существует
-            await CreateAdminUserAsync(userManager);
+        // Создаем администратора если он не существует
+        await CreateAdminUserAsync(userManager);
 
-            // Создаем тестовые данные
-            await CreateSampleDataAsync(context, userManager);
+        // Создаем тестовых пользователей если их нет
+        await CreateTestUsersAsync(userManager);
+
+        // Проверяем и исправляем существующих тестовых пользователей
+        await FixExistingTestUsersAsync(userManager);
+
+        // Создаем тестовые данные
+        await CreateSampleDataAsync(context, userManager);
         }
 
         private static async Task CreateRolesAsync(RoleManager<Role> roleManager)
@@ -65,6 +71,124 @@ namespace SpaceBlog.Data
                 if (result.Succeeded)
                 {
                     await userManager.AddToRoleAsync(adminUser, Role.Names.Administrator);
+                }
+            }
+        }
+
+        private static async Task CreateTestUsersAsync(UserManager<BlogUser> userManager)
+        {
+            // Создаем тестового модератора
+            var moderatorEmail = "moderator@spaceblog.com";
+            var moderatorUser = await userManager.FindByEmailAsync(moderatorEmail);
+
+            if (moderatorUser == null)
+            {
+                moderatorUser = new BlogUser
+                {
+                    UserName = moderatorEmail,
+                    Email = moderatorEmail,
+                    EmailConfirmed = true,
+                    FirstName = "Модератор",
+                    LastName = "Тест",
+                    Bio = "Модератор контента в космическом блоге",
+                    RegistrationDate = DateTime.UtcNow
+                };
+
+                var result = await userManager.CreateAsync(moderatorUser, "Moderator123!");
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(moderatorUser, Role.Names.Moderator);
+                    Console.WriteLine($"✅ Тестовый модератор создан: {moderatorEmail}");
+                }
+                else
+                {
+                    Console.WriteLine($"❌ Ошибка создания модератора: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"ℹ️ Тестовый модератор уже существует: {moderatorEmail}");
+            }
+
+            // Создаем тестового пользователя
+            var userEmail = "user@spaceblog.com";
+            var testUser = await userManager.FindByEmailAsync(userEmail);
+
+            if (testUser == null)
+            {
+                testUser = new BlogUser
+                {
+                    UserName = userEmail,
+                    Email = userEmail,
+                    EmailConfirmed = true,
+                    FirstName = "Обычный",
+                    LastName = "Пользователь",
+                    Bio = "Обычный пользователь блога, читатель статей",
+                    RegistrationDate = DateTime.UtcNow
+                };
+
+                var result = await userManager.CreateAsync(testUser, "User123!");
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(testUser, Role.Names.User);
+                    Console.WriteLine($"✅ Тестовый пользователь создан: {userEmail}");
+                }
+                else
+                {
+                    Console.WriteLine($"❌ Ошибка создания пользователя: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"ℹ️ Тестовый пользователь уже существует: {userEmail}");
+            }
+        }
+
+        private static async Task FixExistingTestUsersAsync(UserManager<BlogUser> userManager)
+        {
+            Console.WriteLine("🔧 Проверяем существующих тестовых пользователей...");
+            
+            // Проверяем модератора
+            var moderatorUser = await userManager.FindByEmailAsync("moderator@spaceblog.com");
+            if (moderatorUser != null)
+            {
+                // Проверяем пароль
+                var passwordCheck = await userManager.CheckPasswordAsync(moderatorUser, "Moderator123!");
+                if (!passwordCheck)
+                {
+                    Console.WriteLine("🔑 Исправляем пароль модератора...");
+                    var token = await userManager.GeneratePasswordResetTokenAsync(moderatorUser);
+                    await userManager.ResetPasswordAsync(moderatorUser, token, "Moderator123!");
+                }
+                
+                // Проверяем роль
+                var isInRole = await userManager.IsInRoleAsync(moderatorUser, Role.Names.Moderator);
+                if (!isInRole)
+                {
+                    Console.WriteLine("👑 Добавляем роль модератора...");
+                    await userManager.AddToRoleAsync(moderatorUser, Role.Names.Moderator);
+                }
+            }
+            
+            // Проверяем обычного пользователя
+            var testUser = await userManager.FindByEmailAsync("user@spaceblog.com");
+            if (testUser != null)
+            {
+                // Проверяем пароль
+                var passwordCheck = await userManager.CheckPasswordAsync(testUser, "User123!");
+                if (!passwordCheck)
+                {
+                    Console.WriteLine("🔑 Исправляем пароль пользователя...");
+                    var token = await userManager.GeneratePasswordResetTokenAsync(testUser);
+                    await userManager.ResetPasswordAsync(testUser, token, "User123!");
+                }
+                
+                // Проверяем роль
+                var isInRole = await userManager.IsInRoleAsync(testUser, Role.Names.User);
+                if (!isInRole)
+                {
+                    Console.WriteLine("👤 Добавляем роль пользователя...");
+                    await userManager.AddToRoleAsync(testUser, Role.Names.User);
                 }
             }
         }
