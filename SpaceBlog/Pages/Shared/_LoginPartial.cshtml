@@ -21,8 +21,8 @@
             <li><a class="dropdown-item" asp-page="/Users/Details" asp-route-id="@UserManager.GetUserId(User)">
                 <i class="fas fa-user me-2"></i>Мой профиль
             </a></li>
-            <li><a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">
-                <i class="fas fa-cog me-2"></i>Настройки профиля
+            <li><a class="dropdown-item" asp-page="/Users/Profile">
+                <i class="fas fa-edit me-2"></i>Редактировать профиль
             </a></li>
             @if (User.IsInRole(SpaceBlog.Models.Role.Names.Administrator) || User.IsInRole(SpaceBlog.Models.Role.Names.Moderator))
             {

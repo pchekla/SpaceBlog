@@ -201,7 +201,8 @@ namespace SpaceBlog.Pages.Users
             Input.Email = EditingUser.Email ?? "";
 
             // Загружаем доступные роли
-            AvailableRoles = await _roleManager.Roles
+            var roles = await _roleManager.Roles.ToListAsync();
+            AvailableRoles = roles
                 .Select(r => new RoleViewModel
                 {
                     Id = r.Id,
@@ -209,7 +210,7 @@ namespace SpaceBlog.Pages.Users
                     DisplayName = GetRoleDisplayName(r.Name ?? "")
                 })
                 .OrderBy(r => r.DisplayName)
-                .ToListAsync();
+                .ToList();
 
             // Загружаем текущие роли пользователя
             var currentRoles = await _userManager.GetRolesAsync(EditingUser);

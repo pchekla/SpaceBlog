@@ -1,0 +1,160 @@
+@page
+@model SpaceBlog.Pages.Users.ProfileModel
+@using Microsoft.AspNetCore.Identity
+@using SpaceBlog.Models
+@inject UserManager<BlogUser> UserManager
+@{
+    ViewData["Title"] = "Редактирование профиля";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8 col-sm-12">
+            <div class="card shadow-lg border-0">
+                <!-- Заголовок с градиентом -->
+                <div class="card-header text-center text-white py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.5rem 0.5rem 0 0;">
+                    <h2 class="mb-0">
+                        <i class="fas fa-user-edit me-2"></i>Редактирование профиля
+                    </h2>
+                    <p class="mb-0 mt-2 opacity-75">Обновите информацию о себе</p>
+                </div>
+
+                <div class="card-body p-4">
+                    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>@Model.StatusMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        
+                        <!-- Аватар пользователя -->
+                        <div class="text-center mb-4">
+                            <div class="position-relative d-inline-block">
+                                <div class="bg-light border rounded-circle d-flex align-items-center justify-content-center mx-auto" 
+                                     style="width: 100px; height: 100px;">
+                                    <i class="fas fa-user fa-3x text-muted"></i>
+                                </div>
+                                <!-- Заглушка для будущего функционала загрузки аватарки -->
+                                <button type="button" class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle" 
+                                        style="width: 30px; height: 30px;" title="Изменить аватар" disabled>
+                                    <i class="fas fa-camera" style="font-size: 12px;"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted d-block mt-2">
+                                <i class="fas fa-info-circle me-1"></i>Загрузка аватара будет добавлена позже
+                            </small>
+                        </div>
+                        
+                        <!-- Имя -->
+                        <div class="form-floating mb-4">
+                            <input asp-for="Input.FirstName" class="form-control" autocomplete="given-name" aria-required="true" placeholder="Введите имя" />
+                            <label asp-for="Input.FirstName" class="text-muted">
+                                <i class="fas fa-user me-1"></i>Имя
+                            </label>
+                            <span asp-validation-for="Input.FirstName" class="text-danger"></span>
+                        </div>
+                        
+                        <!-- Фамилия -->
+                        <div class="form-floating mb-4">
+                            <input asp-for="Input.LastName" class="form-control" autocomplete="family-name" aria-required="true" placeholder="Введите фамилию" />
+                            <label asp-for="Input.LastName" class="text-muted">
+                                <i class="fas fa-user me-1"></i>Фамилия
+                            </label>
+                            <span asp-validation-for="Input.LastName" class="text-danger"></span>
+                        </div>
+                        
+                        <!-- О себе -->
+                        <div class="form-floating mb-4">
+                            <textarea asp-for="Input.Bio" class="form-control" style="height: 100px;" placeholder="Расскажите о себе"></textarea>
+                            <label asp-for="Input.Bio" class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>О себе
+                            </label>
+                            <span asp-validation-for="Input.Bio" class="text-danger"></span>
+                        </div>
+                        
+                        <!-- Дата рождения -->
+                        <div class="form-floating mb-4">
+                            <input asp-for="Input.BirthDate" class="form-control" type="date" placeholder="Выберите дату рождения" />
+                            <label asp-for="Input.BirthDate" class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>Дата рождения
+                            </label>
+                            <span asp-validation-for="Input.BirthDate" class="text-danger"></span>
+                        </div>
+                        
+                        <!-- Кнопка сохранения -->
+                        <div class="d-grid mb-4">
+                            <button type="submit" class="btn btn-lg text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                                <i class="fas fa-save me-2"></i>Сохранить изменения
+                            </button>
+                        </div>
+                        
+                        <!-- Ссылка на профиль -->
+                        <div class="text-center">
+                            <a asp-page="./Details" asp-route-id="@UserManager.GetUserId(User)" class="text-decoration-none fw-semibold" style="color: #667eea;">
+                                <i class="fas fa-user me-1"></i>Посмотреть профиль
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Футер карточки -->
+                <div class="card-footer text-center py-3" style="background-color: #f8f9fa; border-radius: 0 0 0.5rem 0.5rem;">
+                    <small class="text-muted">
+                        <i class="fas fa-shield-alt me-1"></i>
+                        Ваши данные защищены и видны только вам
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <style>
+        /* Custom CSS for profile edit page */
+        .card {
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label,
+        .form-floating > .form-select:focus ~ label,
+        .form-floating > .form-select:not([size]):not([multiple]):not([size="1"]) ~ label {
+            color: #667eea !important;
+        }
+        
+        .form-floating > .form-control:focus,
+        .form-floating > .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        @@media (max-width: 576px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .card-header h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+}
