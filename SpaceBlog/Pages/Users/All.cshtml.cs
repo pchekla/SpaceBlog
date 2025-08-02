@@ -190,8 +190,9 @@ namespace SpaceBlog.Pages.Users
         {
             if (CurrentUser == null) return false;
 
-            // Администратор может управлять пользователями
-            return CurrentUserRoles.Contains(Role.Names.Administrator);
+            // Администратор и модератор могут управлять пользователями
+            return CurrentUserRoles.Contains(Role.Names.Administrator) || 
+                   CurrentUserRoles.Contains(Role.Names.Moderator);
         }
     }
 }

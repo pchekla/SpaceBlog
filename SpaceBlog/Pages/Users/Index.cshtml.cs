@@ -7,7 +7,7 @@ using SpaceBlog.Models;
 
 namespace SpaceBlog.Pages.Users
 {
-    [Authorize(Policy = "RequireAdministrator")] // Только администраторы могут управлять пользователями
+    [Authorize(Policy = "RequireModerator")] // Модераторы и администраторы могут управлять пользователями
     public class IndexModel : PageModel
     {
         private readonly UserManager<BlogUser> _userManager;
