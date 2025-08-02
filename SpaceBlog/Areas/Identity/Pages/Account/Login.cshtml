@@ -23,18 +23,18 @@
                             @if (!ViewData.ModelState.IsValid)
                             {
                                 @* Показываем общие ошибки (ошибки входа) *@
-                                @if (ViewData.ModelState[""] != null && ViewData.ModelState[""].Errors.Any())
+                                @if (ViewData.ModelState[""] != null && ViewData.ModelState[""]!.Errors.Any())
                                 {
                                     <div class="alert alert-danger" role="alert">
                                         <i class="fas fa-exclamation-circle me-2"></i>
-                                        @foreach (var error in ViewData.ModelState[""].Errors)
+                                        @foreach (var error in ViewData.ModelState[""]!.Errors)
                                         {
                                             <div>@error.ErrorMessage</div>
                                         }
                                     </div>
                                 }
                                 @* Если нет конкретных ошибок, но ModelState невалиден, показываем общую ошибку *@
-                                else if (ViewData.ModelState.Where(x => x.Key != "" && x.Value.Errors.Count > 0).Any() == false)
+                                else if (ViewData.ModelState.Where(x => x.Key != "" && x.Value?.Errors.Count > 0).Any() == false)
                                 {
                                     <div class="alert alert-danger" role="alert">
                                         <i class="fas fa-exclamation-circle me-2"></i>
