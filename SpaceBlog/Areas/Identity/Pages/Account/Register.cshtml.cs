@@ -53,7 +53,7 @@ namespace SpaceBlog.Areas.Identity.Pages.Account
             public string Email { get; set; } = string.Empty;
 
             [Required(ErrorMessage = "Пароль обязателен для заполнения")]
-            [StringLength(100, ErrorMessage = "Пароль должен содержать минимум {2} и максимум {1} символов.", MinimumLength = 6)]
+            [StringLength(100, ErrorMessage = "Пароль должен содержать минимум {2} и максимум {1} символов.", MinimumLength = 8)]
             [DataType(DataType.Password)]
             [Display(Name = "Пароль")]
             public string Password { get; set; } = string.Empty;
@@ -105,11 +105,11 @@ namespace SpaceBlog.Areas.Identity.Pages.Account
                     
                     if (Request.Form.ContainsKey("Input.Email"))
                     {
-                        Input.Email = Request.Form["Input.Email"];
-                        Input.FirstName = Request.Form["Input.FirstName"];
-                        Input.LastName = Request.Form["Input.LastName"];
-                        Input.Password = Request.Form["Input.Password"];
-                        Input.ConfirmPassword = Request.Form["Input.ConfirmPassword"];
+                        Input.Email = Request.Form["Input.Email"].ToString();
+                        Input.FirstName = Request.Form["Input.FirstName"].ToString();
+                        Input.LastName = Request.Form["Input.LastName"].ToString();
+                        Input.Password = Request.Form["Input.Password"].ToString();
+                        Input.ConfirmPassword = Request.Form["Input.ConfirmPassword"].ToString();
                         
                         _logger.LogInformation("Данные восстановлены из формы: Email={Email}, FirstName={FirstName}", 
                             Input.Email, Input.FirstName);
@@ -133,7 +133,7 @@ namespace SpaceBlog.Areas.Identity.Pages.Account
                 _logger.LogInformation("Модель прошла валидацию для email: {Email}", Input.Email);
 
                 // Проверяем, не существует ли уже пользователь с таким email
-                var existingUser = await _userManager.FindByEmailAsync(Input.Email);
+                var existingUser = await _userManager.FindByEmailAsync(Input.Email ?? string.Empty);
                 if (existingUser != null)
                 {
                     _logger.LogWarning("Попытка регистрации с уже существующим email: {Email}", Input.Email);
@@ -157,7 +157,7 @@ namespace SpaceBlog.Areas.Identity.Pages.Account
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 
                 _logger.LogInformation("Создание пользователя в базе данных: {Email}", Input.Email);
-                var result = await _userManager.CreateAsync(user, Input.Password);
+                var result = await _userManager.CreateAsync(user, Input.Password ?? string.Empty);
 
                 if (result.Succeeded)
                 {
@@ -190,7 +190,20 @@ namespace SpaceBlog.Areas.Identity.Pages.Account
 
                 foreach (var error in result.Errors)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    // Переводим системные ошибки на русский
+                    string translatedError = error.Code switch
+                    {
+                        "PasswordTooShort" => "Пароль должен содержать минимум 8 символов",
+                        "PasswordRequiresNonAlphanumeric" => "Пароль должен содержать хотя бы один специальный символ",
+                        "PasswordRequiresDigit" => "Пароль должен содержать хотя бы одну цифру",
+                        "PasswordRequiresLower" => "Пароль должен содержать хотя бы одну строчную букву",
+                        "PasswordRequiresUpper" => "Пароль должен содержать хотя бы одну заглавную букву",
+                        "DuplicateEmail" => "Пользователь с таким email уже существует",
+                        "InvalidEmail" => "Некорректный формат email адреса",
+                        "DuplicateUserName" => "Пользователь с таким именем уже существует",
+                        _ => error.Description
+                    };
+                    ModelState.AddModelError(string.Empty, translatedError);
                 }
 
                 return Page();
