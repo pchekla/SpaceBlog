@@ -20,7 +20,10 @@
                     <section>
                         <form id="account" method="post">
                             @Html.AntiForgeryToken()
-                            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                            @if (!string.IsNullOrEmpty(Model.ErrorMessage) || !ViewData.ModelState.IsValid)
+                            {
+                                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                            }
                             
                             <!-- Email -->
                             <div class="mb-3">
@@ -56,12 +59,12 @@
                             <div class="text-center">
                                 <p class="text-muted mb-2">
                                     Еще нет аккаунта? 
-                                    <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="text-decoration-none fw-semibold" style="color: #667eea;">
+                                    <a href="/Identity/Account/Register?returnUrl=@(Model.ReturnUrl ?? "")" style="color: #667eea; text-decoration: none; font-weight: 600; cursor: pointer;">
                                         Зарегистрируйтесь
                                     </a>
                                 </p>
                                 <div class="mt-3">
-                                    <a asp-page="./ForgotPassword" class="text-decoration-none text-muted">
+                                    <a href="/Identity/Account/ForgotPassword" style="color: #6c757d; text-decoration: none; cursor: pointer;">
                                         <i class="fas fa-key me-1"></i>Забыли пароль?
                                     </a>
                                 </div>
@@ -164,4 +167,25 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Проверяем, что ссылки работают
+            const registerLink = document.querySelector('a[href*="Register"]');
+            if (registerLink) {
+                registerLink.addEventListener('click', function(e) {
+                    console.log('Клик по ссылке регистрации!', e.target.href);
+                    // Не отменяем событие, пусть ссылка работает
+                });
+            }
+            
+            // Проверяем ссылку "Забыли пароль?"
+            const forgotPasswordLink = document.querySelector('a[href*="ForgotPassword"]');
+            if (forgotPasswordLink) {
+                forgotPasswordLink.addEventListener('click', function(e) {
+                    console.log('Клик по ссылке восстановления пароля!', e.target.href);
+                    // Не отменяем событие, пусть ссылка работает
+                });
+            }
+        });
+    </script>
 }

@@ -29,7 +29,10 @@
                     }
 
                     <form method="post">
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        @if (!ViewData.ModelState.IsValid)
+                        {
+                            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        }
                         
                         <!-- Аватар пользователя -->
                         <div class="text-center mb-4">
