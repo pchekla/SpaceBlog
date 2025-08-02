@@ -30,9 +30,14 @@
             color: white !important;
             font-weight: 500;
             transition: all 0.3s ease;
-            margin: 0 5px;
+            margin: 0 4px;
             border-radius: 6px;
-            padding: 8px 16px !important;
+            padding: 8px 12px !important;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
         }
         .navbar .nav-link:hover {
             background-color: rgba(255,255,255,0.2);
@@ -69,6 +74,113 @@
         .footer a:hover {
             color: white;
         }
+        
+        /* Улучшения навигации для длинных имен пользователей */
+        .user-name-text {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: inline-block;
+        }
+        
+        .navbar-nav .dropdown-menu {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            min-width: 220px;
+            background: white;
+            margin-top: 8px;
+        }
+        
+        .dropdown-menu .dropdown-item {
+            transition: all 0.3s ease;
+            border-radius: 4px;
+            margin: 2px 8px;
+        }
+        
+        .dropdown-menu .dropdown-item:hover {
+            background-color: #667eea;
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        /* Улучшения для больших экранов */
+        @@media (min-width: 1200px) {
+            .navbar .nav-link {
+                padding: 10px 16px !important;
+                margin: 0 6px;
+            }
+            
+            .navbar-brand {
+                font-size: 1.9rem;
+            }
+        }
+        
+        /* Адаптивность для мобильных устройств */
+        @@media (max-width: 991px) {
+            .user-name-text {
+                max-width: 150px;
+            }
+            
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+            
+            .navbar-nav .nav-link {
+                padding: 8px 16px !important;
+                margin: 4px 0;
+                min-width: auto;
+                text-align: left;
+                justify-content: flex-start;
+            }
+            
+            .navbar-nav {
+                padding-top: 10px;
+            }
+        }
+        
+        @@media (max-width: 576px) {
+            .user-name-text {
+                max-width: 120px;
+            }
+            
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+            
+            .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+        }
+        
+        /* Улучшения для выпадающих меню */
+        .navbar .dropdown-toggle::after {
+            transition: transform 0.3s ease;
+        }
+        
+        .navbar .dropdown-toggle[aria-expanded="true"]::after {
+            transform: rotate(180deg);
+        }
+        
+        /* Дополнительные улучшения навигации */
+        .navbar-nav .nav-item {
+            margin: 0 2px;
+        }
+        
+        .navbar-nav .nav-item .nav-link i {
+            margin-right: 6px;
+            width: 16px;
+            text-align: center;
+        }
+        
+        /* Стили для улучшения расстояний */
+        @@media (min-width: 992px) {
+            .navbar-nav {
+                gap: 4px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -83,7 +195,7 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-lg-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1 ms-4">
+                    <ul class="navbar-nav flex-grow-1 ms-3">
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-page="/Index">
                                 <i class="fas fa-home me-1"></i>Главная

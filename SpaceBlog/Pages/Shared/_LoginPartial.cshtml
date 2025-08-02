@@ -6,16 +6,19 @@
 @{
     // Получаем текущего пользователя асинхронно
     var currentUser = await UserManager.GetUserAsync(User);
-    var displayName = currentUser?.GetDisplayName() ?? User.Identity?.Name ?? "Пользователь";
+    var fullDisplayName = currentUser?.GetDisplayName() ?? User.Identity?.Name ?? "Пользователь";
+    
+    // Ограничиваем длину имени для отображения в навигации
+    var displayName = fullDisplayName.Length > 20 ? fullDisplayName.Substring(0, 17) + "..." : fullDisplayName;
 }
 
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
     <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <a class="nav-link dropdown-toggle text-white d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="@fullDisplayName">
             <i class="fas fa-user-circle me-1"></i>
-            @displayName
+            <span class="user-name-text">@displayName</span>
         </a>
         <ul class="dropdown-menu dropdown-menu-end">
             <li><a class="dropdown-item" asp-page="/Users/Details" asp-route-id="@UserManager.GetUserId(User)">

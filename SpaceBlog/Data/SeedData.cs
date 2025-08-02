@@ -62,7 +62,7 @@ namespace SpaceBlog.Data
                     Email = adminEmail,
                     EmailConfirmed = true,
                     FirstName = "Администратор",
-                    LastName = "Системы",
+                    LastName = "1",
                     Bio = "Главный администратор блога SpaceBlog",
                     RegistrationDate = DateTime.UtcNow
                 };
@@ -89,7 +89,7 @@ namespace SpaceBlog.Data
                     Email = moderatorEmail,
                     EmailConfirmed = true,
                     FirstName = "Модератор",
-                    LastName = "Тест",
+                    LastName = "1",
                     Bio = "Модератор контента в космическом блоге",
                     RegistrationDate = DateTime.UtcNow
                 };
@@ -121,8 +121,8 @@ namespace SpaceBlog.Data
                     UserName = userEmail,
                     Email = userEmail,
                     EmailConfirmed = true,
-                    FirstName = "Обычный",
-                    LastName = "Пользователь",
+                    FirstName = "Пользователь",
+                    LastName = "1",
                     Bio = "Обычный пользователь блога, читатель статей",
                     RegistrationDate = DateTime.UtcNow
                 };
