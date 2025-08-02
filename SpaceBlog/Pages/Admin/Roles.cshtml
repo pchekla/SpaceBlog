@@ -230,14 +230,7 @@
                                 <small class="text-muted d-block">Базовые права</small>
                             </label>
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" value="" 
-                                   id="roleNone" name="selectedRole">
-                            <label class="form-check-label" for="roleNone">
-                                <i class="fas fa-minus text-muted me-2"></i><em class="text-muted">Без роли</em>
-                                <small class="text-muted d-block">Убрать все роли</small>
-                            </label>
-                        </div>
+
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -280,12 +273,12 @@
                 if (radioButton) {
                     radioButton.checked = true;
                 } else {
-                    // Если роль не найдена, выбираем "Без роли"
-                    document.getElementById('roleNone').checked = true;
+                    // Если роль не найдена, выбираем "Пользователь" по умолчанию
+                    document.getElementById('roleUser').checked = true;
                 }
             } else {
-                // Если нет ролей, выбираем "Без роли"
-                document.getElementById('roleNone').checked = true;
+                // Если нет ролей, выбираем "Пользователь" по умолчанию
+                document.getElementById('roleUser').checked = true;
             }
             
             console.log('Модальное окно ролей подготовлено для пользователя:', userName);

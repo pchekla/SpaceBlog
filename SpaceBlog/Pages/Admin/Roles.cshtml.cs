@@ -139,22 +139,27 @@ namespace SpaceBlog.Pages.Admin
                 }
 
                 // Добавляем новую роль
-                if (!string.IsNullOrEmpty(selectedRole) && 
-                    (selectedRole == Role.Names.Administrator || 
-                     selectedRole == Role.Names.Moderator || 
-                     selectedRole == Role.Names.Author || 
-                     selectedRole == Role.Names.User))
+                string roleToAssign = selectedRole;
+                
+                // Если роль не выбрана или недопустима, назначаем роль "Пользователь" по умолчанию
+                if (string.IsNullOrEmpty(selectedRole) ||
+                    (selectedRole != Role.Names.Administrator && 
+                     selectedRole != Role.Names.Moderator && 
+                     selectedRole != Role.Names.Author && 
+                     selectedRole != Role.Names.User))
                 {
-                    var addResult = await _userManager.AddToRoleAsync(user, selectedRole);
-                    if (!addResult.Succeeded)
-                    {
-                        StatusMessage = "Ошибка при назначении новой роли.";
-                        return RedirectToPage();
-                    }
+                    roleToAssign = Role.Names.User;
+                }
+
+                var addResult = await _userManager.AddToRoleAsync(user, roleToAssign);
+                if (!addResult.Succeeded)
+                {
+                    StatusMessage = "Ошибка при назначении новой роли.";
+                    return RedirectToPage();
                 }
 
                 _logger.LogInformation("Роль пользователя {UserId} изменена администратором {AdminId}. Новая роль: {Role}", 
-                    userId, User.Identity?.Name, selectedRole ?? "Без роли");
+                    userId, User.Identity?.Name, roleToAssign);
 
                 StatusMessage = $"Роли пользователя {user.GetDisplayName()} успешно обновлены.";
                 return RedirectToPage();
