@@ -101,7 +101,7 @@
                                             @foreach (var tag in article.ArticleTags.Take(3))
                                             {
                                                 <span class="badge bg-light text-dark me-1 mb-1">
-                                                    @tag.Tag.Name
+                                                    @tag.Tag?.Name
                                                 </span>
                                             }
                                             @if (article.ArticleTags.Count > 3)

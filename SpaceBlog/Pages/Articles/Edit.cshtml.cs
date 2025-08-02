@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using SpaceBlog.Data;
-using SpaceBlog.Models;
+using SpaceBlog.Api.Data;
+using SpaceBlog.Api.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace SpaceBlog.Pages.Articles
@@ -128,6 +128,9 @@ namespace SpaceBlog.Pages.Articles
 
             await LoadTagsAsync();
 
+            // Логируем выбранные теги для отладки
+            _logger.LogInformation($"Выбранные теги при сохранении: [{string.Join(", ", SelectedTagIds)}]");
+
             if (!ModelState.IsValid)
             {
                 return Page();
@@ -194,15 +197,13 @@ namespace SpaceBlog.Pages.Articles
 
         private async Task LoadTagsAsync()
         {
-            // Загружаем только доступные теги (без перезаписи Input данных)
+            // Загружаем только доступные теги (без перезаписи выбранных тегов)
             AvailableTags = await _context.Tags
                 .OrderBy(t => t.Name)
                 .ToListAsync();
 
-            // Загружаем выбранные теги из текущей статьи
-            SelectedTagIds = Article.ArticleTags
-                .Select(at => at.TagId)
-                .ToList();
+            // НЕ перезаписываем SelectedTagIds здесь, так как они приходят из формы
+            // SelectedTagIds уже содержат выбранные пользователем теги из формы
         }
     }
 }

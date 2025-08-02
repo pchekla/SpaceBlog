@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SpaceBlog.Models
+namespace SpaceBlog.Api.Models
 {
     public class Tag
     {

@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using SpaceBlog.Models;
+using SpaceBlog.Api.Models;
 
-namespace SpaceBlog.Data
+namespace SpaceBlog.Api.Data
 {
     public class ApplicationDbContext : IdentityDbContext<BlogUser, Role, string>
     {
@@ -21,6 +21,12 @@ namespace SpaceBlog.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            // Исправление проблемы с Identity Foreign Keys
+            builder.Entity<IdentityUserRole<string>>(entity =>
+            {
+                entity.HasKey(ur => new { ur.UserId, ur.RoleId });
+            });
 
             // Конфигурация BlogUser
             builder.Entity<BlogUser>(entity =>

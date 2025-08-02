@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 
-namespace SpaceBlog.Models
+namespace SpaceBlog.Api.Models
 {
     public class Role : IdentityRole
     {

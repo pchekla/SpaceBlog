@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text.Json;
 
-namespace SpaceBlog.Middleware
+namespace SpaceBlog.Api.Middleware
 {
     public class GlobalExceptionMiddleware
     {

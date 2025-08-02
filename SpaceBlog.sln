@@ -5,6 +5,8 @@ VisualStudioVersion = 17.14.36203.30 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceBlog", "SpaceBlog\SpaceBlog.csproj", "{AFB2A66F-6F79-49DF-BEED-B5EFA47D621E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceBlog.Api", "SpaceBlog.Api\SpaceBlog.Api.csproj", "{C0B89C9B-0CBF-4852-9C69-213C957820B6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{AFB2A66F-6F79-49DF-BEED-B5EFA47D621E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AFB2A66F-6F79-49DF-BEED-B5EFA47D621E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AFB2A66F-6F79-49DF-BEED-B5EFA47D621E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0B89C9B-0CBF-4852-9C69-213C957820B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0B89C9B-0CBF-4852-9C69-213C957820B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0B89C9B-0CBF-4852-9C69-213C957820B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0B89C9B-0CBF-4852-9C69-213C957820B6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

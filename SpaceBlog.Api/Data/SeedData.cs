@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using SpaceBlog.Models;
+using SpaceBlog.Api.Models;
 
-namespace SpaceBlog.Data
+namespace SpaceBlog.Api.Data
 {
     public static class SeedData
     {
@@ -206,8 +206,8 @@ namespace SpaceBlog.Data
                     UserName = authorEmail,
                     Email = authorEmail,
                     EmailConfirmed = true,
-                    FirstName = "Тестовый",
-                    LastName = "Автор",
+                    FirstName = "Автор",
+                    LastName = "1",
                     Bio = "Автор тестовых статей для демонстрации возможностей блога",
                     RegistrationDate = DateTime.UtcNow
                 };

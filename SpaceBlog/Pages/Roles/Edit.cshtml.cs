@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using SpaceBlog.Models;
+using SpaceBlog.Api.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace SpaceBlog.Pages.Roles
@@ -157,10 +157,10 @@ namespace SpaceBlog.Pages.Roles
 
         private static bool IsSystemRole(string roleName)
         {
-            return roleName == SpaceBlog.Models.Role.Names.Administrator ||
-                   roleName == SpaceBlog.Models.Role.Names.Moderator ||
-                   roleName == SpaceBlog.Models.Role.Names.Author ||
-                   roleName == SpaceBlog.Models.Role.Names.User;
+            return roleName == SpaceBlog.Api.Models.Role.Names.Administrator ||
+                   roleName == SpaceBlog.Api.Models.Role.Names.Moderator ||
+                   roleName == SpaceBlog.Api.Models.Role.Names.Author ||
+                   roleName == SpaceBlog.Api.Models.Role.Names.User;
         }
     }
 }

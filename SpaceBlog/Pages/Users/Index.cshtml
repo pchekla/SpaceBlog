@@ -89,7 +89,7 @@
                                                     }
                                                 </div>
                                                 <div>
-                                                    @if (User.IsInRole(SpaceBlog.Models.Role.Names.Administrator))
+                                                    @if (User.IsInRole(SpaceBlog.Api.Models.Role.Names.Administrator))
                                                     {
                                                         <a asp-page="./Edit" asp-route-id="@user.Id" class="btn btn-outline-primary btn-sm me-2">
                                                             <i class="fas fa-edit me-1"></i>Изменить

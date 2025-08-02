@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using SpaceBlog.Data;
-using SpaceBlog.Models;
+using SpaceBlog.Api.Data;
+using SpaceBlog.Api.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace SpaceBlog.Pages.Articles

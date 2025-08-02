@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using SpaceBlog.Models;
+using SpaceBlog.Api.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace SpaceBlog.Areas.Identity.Pages.Account

@@ -2,11 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
-using SpaceBlog.Data;
-using SpaceBlog.Models;
+using SpaceBlog.Api.Data;
+using SpaceBlog.Api.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace SpaceBlog.Controllers
+namespace SpaceBlog.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

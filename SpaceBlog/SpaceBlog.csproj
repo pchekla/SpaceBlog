@@ -23,6 +23,10 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SpaceBlog.Api\SpaceBlog.Api.csproj" />
+  </ItemGroup>
+
 
 
 </Project>

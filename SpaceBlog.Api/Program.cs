@@ -28,9 +28,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseMySql(connectionString, serverVersion);
     }
 });
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-// Настройка Identity с ролями
+// Настройка Identity с ролями (для API аутентификации)
 builder.Services.AddIdentity<BlogUser, Role>(options => 
     {
         options.SignIn.RequireConfirmedAccount = false;
@@ -43,14 +42,6 @@ builder.Services.AddIdentity<BlogUser, Role>(options =>
     })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
-
-// Настройка путей для Identity
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.LoginPath = "/Identity/Account/Login";
-    options.LogoutPath = "/Identity/Account/Logout";
-    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-});
 
 // Добавляем поддержку Web API контроллеров
 builder.Services.AddControllers()
@@ -99,48 +90,28 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddRazorPages()
-    .AddRazorRuntimeCompilation(); // Добавляем горячую перезагрузку Razor страниц
-
-// Настройка антифоджерных токенов
-builder.Services.AddAntiforgery(options =>
-{
-    options.HeaderName = "X-XSRF-TOKEN";
-    options.SuppressXFrameOptionsHeader = false;
-    options.Cookie.Name = "__RequestVerificationToken";
-    options.Cookie.HttpOnly = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-});
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
-// Глобальный обработчик исключений - работает во всех окружениях
+// Глобальный обработчик исключений для API
 app.UseGlobalExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseMigrationsEndPoint();
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "SpaceBlog API V1");
-        c.RoutePrefix = "api/docs"; // Swagger UI будет доступен по адресу /api/docs
+        c.RoutePrefix = "swagger"; // Swagger UI будет доступен по адресу /swagger
     });
 }
 else
 {
-    // В production дополнительно используем встроенный обработчик как fallback
-    app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
 
-// Настройка обработки статусных кодов ошибок
-app.UseStatusCodePagesWithReExecute("/Error/{0}");
-
 app.UseHttpsRedirection();
-app.UseStaticFiles();
 
 app.UseRouting();
 app.UseCors("AllowFrontend");
@@ -148,7 +119,7 @@ app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Инициализация базы данных и данных
+// Инициализация базы данных и данных (только если это необходимо)
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -159,39 +130,27 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<ApplicationDbContext>();
         
         // Проверка подключения к базе данных
-        logger.LogInformation("Проверка подключения к базе данных...");
+        logger.LogInformation("API: Проверка подключения к базе данных...");
         await context.Database.CanConnectAsync();
-        logger.LogInformation("Подключение к базе данных успешно.");
+        logger.LogInformation("API: Подключение к базе данных успешно.");
         
-        // Создание базы данных если она не существует
-        logger.LogInformation("Создание базы данных если не существует...");
-        await context.Database.EnsureCreatedAsync();
+        // Применение миграций (если необходимо)
+        if (context.Database.GetPendingMigrations().Any())
+        {
+            logger.LogInformation("API: Применение миграций...");
+            await context.Database.MigrateAsync();
+        }
         
-        // Применение миграций
-        logger.LogInformation("Применение миграций...");
-        await context.Database.MigrateAsync();
-        
-        // Инициализация тестовых данных
-        logger.LogInformation("Инициализация тестовых данных...");
-        await SeedData.Initialize(services);
-        
-        logger.LogInformation("Инициализация базы данных завершена успешно.");
+        logger.LogInformation("API: Инициализация базы данных завершена успешно.");
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Ошибка при инициализации базы данных");
-        logger.LogWarning("ВАЖНО: Проверьте настройки подключения к MySQL в appsettings.json");
-        logger.LogWarning("Убедитесь что:");
-        logger.LogWarning("1. MySQL Server запущен");
-        logger.LogWarning("2. База данных создана");
-        logger.LogWarning("3. Пользователь имеет права доступа");
-        logger.LogWarning("4. Строка подключения корректна");
-        logger.LogWarning("Приложение продолжит работу, но без доступа к базе данных.");
+        logger.LogError(ex, "API: Ошибка при инициализации базы данных");
+        logger.LogWarning("API: Приложение продолжит работу, но без доступа к базе данных.");
     }
 }
 
 // Настройка маршрутов для API контроллеров
 app.MapControllers();
-app.MapRazorPages();
 
 app.Run();

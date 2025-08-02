@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using SpaceBlog.Models;
+using SpaceBlog.Api.Models;
 
 namespace SpaceBlog.Pages.Users
 {

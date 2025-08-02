@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using SpaceBlog.Data;
-using SpaceBlog.Models;
+using SpaceBlog.Api.Data;
+using SpaceBlog.Api.Models;
 
 namespace SpaceBlog.Pages.Tags
 {

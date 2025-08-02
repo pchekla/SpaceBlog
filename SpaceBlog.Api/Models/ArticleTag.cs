@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace SpaceBlog.Models
+namespace SpaceBlog.Api.Models
 {
     public class ArticleTag
     {

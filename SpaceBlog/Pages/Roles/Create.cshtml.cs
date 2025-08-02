@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using SpaceBlog.Models;
+using SpaceBlog.Api.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace SpaceBlog.Pages.Roles

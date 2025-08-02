@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using SpaceBlog.Models;
+using SpaceBlog.Api.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace SpaceBlog.Areas.Identity.Pages.Account
@@ -95,8 +95,8 @@ namespace SpaceBlog.Areas.Identity.Pages.Account
                 // Попробуем заполнить из данных формы вручную
                 if (Request.Form.ContainsKey("Input.Email"))
                 {
-                    Input.Email = Request.Form["Input.Email"];
-                    Input.Password = Request.Form["Input.Password"];
+                    Input.Email = Request.Form["Input.Email"].ToString();
+                    Input.Password = Request.Form["Input.Password"].ToString();
                     Input.RememberMe = Request.Form["Input.RememberMe"].ToString().Contains("true");
                     
                     _logger.LogInformation("Данные восстановлены из формы: Email={Email}", Input.Email);
@@ -112,7 +112,7 @@ namespace SpaceBlog.Areas.Identity.Pages.Account
             if (ModelState.IsValid)
             {
                 // Поиск пользователя по email
-                var user = await _userManager.FindByEmailAsync(Input.Email);
+                var user = await _userManager.FindByEmailAsync(Input.Email ?? string.Empty);
                 if (user == null)
                 {
                     ModelState.AddModelError(string.Empty, "Неверный email или пароль.");
@@ -127,7 +127,7 @@ namespace SpaceBlog.Areas.Identity.Pages.Account
                 }
 
                 // Попытка входа
-                var result = await _signInManager.PasswordSignInAsync(user, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                var result = await _signInManager.PasswordSignInAsync(user, Input.Password ?? string.Empty, Input.RememberMe, lockoutOnFailure: false);
                 
                 if (result.Succeeded)
                 {

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using SpaceBlog.Data;
+using SpaceBlog.Api.Data;
 
 namespace SpaceBlog.Pages
 {

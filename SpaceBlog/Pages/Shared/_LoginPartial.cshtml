@@ -1,5 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@using SpaceBlog.Models
+@using SpaceBlog.Api.Models
 @inject SignInManager<BlogUser> SignInManager
 @inject UserManager<BlogUser> UserManager
 
@@ -27,7 +27,7 @@
             <li><a class="dropdown-item" asp-page="/Users/Profile">
                 <i class="fas fa-edit me-2"></i>Редактировать профиль
             </a></li>
-            @if (User.IsInRole(SpaceBlog.Models.Role.Names.Administrator) || User.IsInRole(SpaceBlog.Models.Role.Names.Moderator))
+            @if (User.IsInRole(SpaceBlog.Api.Models.Role.Names.Administrator) || User.IsInRole(SpaceBlog.Api.Models.Role.Names.Moderator))
             {
                 <li><a class="dropdown-item" href="/api/docs" target="_blank">
                     <i class="fas fa-code me-2"></i>API панель
