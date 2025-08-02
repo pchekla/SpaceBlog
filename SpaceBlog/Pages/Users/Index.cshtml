@@ -98,14 +98,22 @@
                                                     @if (!user.IsBanned)
                                                     {
                                                         <button type="button" class="btn btn-outline-warning btn-sm" 
-                                                                onclick="confirmBan('@user.Id', '@user.DisplayName')">
+                                                                data-bs-toggle="modal" 
+                                                                data-bs-target="#banModal"
+                                                                data-user-id="@user.Id"
+                                                                data-user-name="@user.DisplayName"
+                                                                onclick="prepareBanModal(this)">
                                                             <i class="fas fa-ban me-1"></i>Заблокировать
                                                         </button>
                                                     }
                                                     else
                                                     {
                                                         <button type="button" class="btn btn-outline-success btn-sm" 
-                                                                onclick="confirmUnban('@user.Id', '@user.DisplayName')">
+                                                                data-bs-toggle="modal" 
+                                                                data-bs-target="#unbanModal"
+                                                                data-user-id="@user.Id"
+                                                                data-user-name="@user.DisplayName"
+                                                                onclick="prepareUnbanModal(this)">
                                                             <i class="fas fa-check me-1"></i>Разблокировать
                                                         </button>
                                                     }
@@ -132,7 +140,7 @@
 </div>
 
 <!-- Модальное окно для блокировки -->
-<div class="modal fade" id="banModal" tabindex="-1" aria-labelledby="banModalLabel" aria-hidden="true">
+<div class="modal fade" id="banModal" tabindex="-1" aria-labelledby="banModalLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -161,7 +169,7 @@
 </div>
 
 <!-- Модальное окно для разблокировки -->
-<div class="modal fade" id="unbanModal" tabindex="-1" aria-labelledby="unbanModalLabel" aria-hidden="true">
+<div class="modal fade" id="unbanModal" tabindex="-1" aria-labelledby="unbanModalLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -191,18 +199,110 @@
 
 @section Scripts {
     <script>
-        function confirmBan(userId, userName) {
+        function prepareBanModal(button) {
+            // Защита от двойного клика
+            if (button.disabled) return;
+            
+            // Принудительная очистка перед открытием
+            cleanupModal();
+            
+            const userId = button.getAttribute('data-user-id');
+            const userName = button.getAttribute('data-user-name');
+            
             document.getElementById('userIdToBan').value = userId;
             document.getElementById('userNameToBan').textContent = userName;
-            var banModal = new bootstrap.Modal(document.getElementById('banModal'));
-            banModal.show();
+            
+            console.log('Модальное окно блокировки подготовлено для пользователя:', userName);
         }
 
-        function confirmUnban(userId, userName) {
+        function prepareUnbanModal(button) {
+            // Защита от двойного клика
+            if (button.disabled) return;
+            
+            // Принудительная очистка перед открытием
+            cleanupModal();
+            
+            const userId = button.getAttribute('data-user-id');
+            const userName = button.getAttribute('data-user-name');
+            
             document.getElementById('userIdToUnban').value = userId;
             document.getElementById('userNameToUnban').textContent = userName;
-            var unbanModal = new bootstrap.Modal(document.getElementById('unbanModal'));
-            unbanModal.show();
+            
+            console.log('Модальное окно разблокировки подготовлено для пользователя:', userName);
+        }
+
+        // Обработчик для корректного закрытия модальных окон
+        document.addEventListener('DOMContentLoaded', function() {
+            const banModal = document.getElementById('banModal');
+            const unbanModal = document.getElementById('unbanModal');
+            
+            // Обработчики для banModal
+            if (banModal) {
+                // Принудительная очистка при загрузке страницы
+                cleanupModal();
+                
+                banModal.addEventListener('hidden.bs.modal', function () {
+                    cleanupModal();
+                });
+                
+                // Дополнительная очистка при показе модального окна
+                banModal.addEventListener('show.bs.modal', function () {
+                    cleanupModal();
+                });
+                
+                // Обработчик ошибок модального окна
+                banModal.addEventListener('hide.bs.modal', function () {
+                    setTimeout(cleanupModal, 100);
+                });
+            }
+            
+            // Обработчики для unbanModal
+            if (unbanModal) {
+                unbanModal.addEventListener('hidden.bs.modal', function () {
+                    cleanupModal();
+                });
+                
+                unbanModal.addEventListener('show.bs.modal', function () {
+                    cleanupModal();
+                });
+                
+                unbanModal.addEventListener('hide.bs.modal', function () {
+                    setTimeout(cleanupModal, 100);
+                });
+            }
+        });
+        
+        // Функция для принудительной очистки модального окна
+        function cleanupModal() {
+            // Убираем все backdrop'ы
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+                backdrop.remove();
+            });
+            
+            // Очищаем классы и стили с body
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('padding-right');
+            document.body.style.removeProperty('overflow');
+            document.body.style.removeProperty('padding-left');
+            
+            // Восстанавливаем прокрутку
+            document.documentElement.style.removeProperty('overflow');
+        }
+        
+        // Аварийная кнопка для разблокировки интерфейса (можно вызвать из консоли)
+        function emergencyUnlock() {
+            const banModalInstance = bootstrap.Modal.getInstance(document.getElementById('banModal'));
+            if (banModalInstance) {
+                banModalInstance.hide();
+            }
+            
+            const unbanModalInstance = bootstrap.Modal.getInstance(document.getElementById('unbanModal'));
+            if (unbanModalInstance) {
+                unbanModalInstance.hide();
+            }
+            
+            cleanupModal();
+            console.log('Интерфейс разблокирован принудительно');
         }
     </script>
     

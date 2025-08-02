@@ -378,6 +378,9 @@ else
 @section Scripts {
     <script>
         function confirmAction(actionType, userId, userName) {
+            // Принудительная очистка перед открытием
+            cleanupModal();
+            
             document.getElementById('actionUserId').value = userId;
             document.getElementById('actionType').value = actionType;
             
@@ -395,6 +398,58 @@ else
         function loadMoreComments() {
             // Здесь можно реализовать AJAX-загрузку дополнительных комментариев
             alert('Функция загрузки дополнительных комментариев будет реализована позже');
+        }
+
+        // Обработчик для корректного закрытия модального окна
+        document.addEventListener('DOMContentLoaded', function() {
+            const actionModal = document.getElementById('actionModal');
+            
+            if (actionModal) {
+                // Принудительная очистка при загрузке страницы
+                cleanupModal();
+                
+                actionModal.addEventListener('hidden.bs.modal', function () {
+                    cleanupModal();
+                });
+                
+                // Дополнительная очистка при показе модального окна
+                actionModal.addEventListener('show.bs.modal', function () {
+                    cleanupModal();
+                });
+                
+                // Обработчик ошибок модального окна
+                actionModal.addEventListener('hide.bs.modal', function () {
+                    setTimeout(cleanupModal, 100);
+                });
+            }
+        });
+        
+        // Функция для принудительной очистки модального окна
+        function cleanupModal() {
+            // Убираем все backdrop'ы
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+                backdrop.remove();
+            });
+            
+            // Очищаем классы и стили с body
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('padding-right');
+            document.body.style.removeProperty('overflow');
+            document.body.style.removeProperty('padding-left');
+            
+            // Восстанавливаем прокрутку
+            document.documentElement.style.removeProperty('overflow');
+        }
+        
+        // Аварийная кнопка для разблокировки интерфейса (можно вызвать из консоли)
+        function emergencyUnlock() {
+            const actionModalInstance = bootstrap.Modal.getInstance(document.getElementById('actionModal'));
+            if (actionModalInstance) {
+                actionModalInstance.hide();
+            }
+            
+            cleanupModal();
+            console.log('Интерфейс разблокирован принудительно');
         }
     </script>
     
