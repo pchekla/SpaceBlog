@@ -73,9 +73,20 @@
                 </div>
                 <h5 class="card-title fw-bold">Система пользователей</h5>
                 <p class="card-text mb-4">Полная система регистрации, аутентификации и управления ролями пользователей</p>
-                <a href="/Users" class="btn btn-primary-modern btn-modern">
-                    <i class="fas fa-users me-2"></i>Управление пользователями
-                </a>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a href="/Users" class="btn btn-primary-modern btn-modern">
+                        <i class="fas fa-users me-2"></i>Управление пользователями
+                    </a>
+                }
+                else
+                {
+                    <div class="text-center p-3 border rounded bg-light">
+                        <p class="mb-2"><i class="fas fa-briefcase text-primary me-2"></i><strong>Приходи к нам работать!</strong></p>
+                        <p class="mb-1">Модерируй статьи и управляй сообществом</p>
+                        <p class="mb-0">Напиши на email: <strong>admin@spaceblog.com</strong></p>
+                    </div>
+                }
             </div>
         </div>
         
@@ -85,8 +96,8 @@
                     <i class="fas fa-edit"></i>
                 </div>
                 <h5 class="card-title fw-bold">Система статей</h5>
-                <p class="card-text mb-4">Создание, редактирование и публикация статей с поддержкой тегов и SEO.# Зарегистрируйтесь и создайте статью</p>
-                <a href="/Articles" class="btn btn-primary-modern btn-modern">
+                <p class="card-text mb-4">Создание, редактирование и публикация статей с поддержкой тегов и SEO</p>
+                <a href="/Articles/All" class="btn btn-primary-modern btn-modern">
                     <i class="fas fa-newspaper me-2"></i>Все статьи
                 </a>
             </div>
@@ -99,7 +110,7 @@
                 </div>
                 <h5 class="card-title fw-bold">Система комментариев</h5>
                 <p class="card-text mb-4">Модерация комментариев с возможностью вложенных ответов и блокировки</p>
-                <a href="/Tags" class="btn btn-primary-modern btn-modern">
+                <a href="/Tags/All" class="btn btn-primary-modern btn-modern">
                     <i class="fas fa-tags me-2"></i>Теги статей
                 </a>
             </div>

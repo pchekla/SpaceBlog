@@ -43,6 +43,14 @@ builder.Services.AddIdentity<BlogUser, Role>(options =>
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
+// Настройка путей для Identity
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Identity/Account/Login";
+    options.LogoutPath = "/Identity/Account/Logout";
+    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+});
+
 // Добавляем поддержку Web API контроллеров
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
