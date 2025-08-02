@@ -26,7 +26,7 @@ namespace SpaceBlog.Pages.Users
         public InputModel Input { get; set; } = new();
 
         [BindProperty]
-        public List<string> SelectedRoleIds { get; set; } = new();
+        public string? SelectedRoleId { get; set; }
 
         public List<RoleViewModel> AvailableRoles { get; set; } = new();
         public BlogUser EditingUser { get; set; } = null!;
@@ -96,7 +96,7 @@ namespace SpaceBlog.Pages.Users
             }
             EditingUser = editingUser;
 
-            await LoadDataAsync();
+            await LoadRolesAsync();
 
             if (!ModelState.IsValid)
             {
@@ -137,24 +137,13 @@ namespace SpaceBlog.Pages.Users
                     }
                 }
 
-                // Обновляем роли пользователя
+                // Обновляем роль пользователя
                 var currentRoles = await _userManager.GetRolesAsync(EditingUser);
-                var selectedRoleNames = new List<string>();
                 
-                foreach (var roleId in SelectedRoleIds)
+                // Сначала удаляем все текущие роли
+                if (currentRoles.Any())
                 {
-                    var role = await _roleManager.FindByIdAsync(roleId);
-                    if (role != null)
-                    {
-                        selectedRoleNames.Add(role.Name!);
-                    }
-                }
-
-                // Удаляем старые роли
-                var rolesToRemove = currentRoles.Except(selectedRoleNames).ToList();
-                if (rolesToRemove.Any())
-                {
-                    var removeResult = await _userManager.RemoveFromRolesAsync(EditingUser, rolesToRemove);
+                    var removeResult = await _userManager.RemoveFromRolesAsync(EditingUser, currentRoles);
                     if (!removeResult.Succeeded)
                     {
                         foreach (var error in removeResult.Errors)
@@ -165,18 +154,21 @@ namespace SpaceBlog.Pages.Users
                     }
                 }
 
-                // Добавляем новые роли
-                var rolesToAdd = selectedRoleNames.Except(currentRoles).ToList();
-                if (rolesToAdd.Any())
+                // Добавляем новую выбранную роль
+                if (!string.IsNullOrEmpty(SelectedRoleId))
                 {
-                    var addResult = await _userManager.AddToRolesAsync(EditingUser, rolesToAdd);
-                    if (!addResult.Succeeded)
+                    var selectedRole = await _roleManager.FindByIdAsync(SelectedRoleId);
+                    if (selectedRole != null)
                     {
-                        foreach (var error in addResult.Errors)
+                        var addResult = await _userManager.AddToRoleAsync(EditingUser, selectedRole.Name!);
+                        if (!addResult.Succeeded)
                         {
-                            ModelState.AddModelError(string.Empty, error.Description);
+                            foreach (var error in addResult.Errors)
+                            {
+                                ModelState.AddModelError(string.Empty, error.Description);
+                            }
+                            return Page();
                         }
-                        return Page();
                     }
                 }
 
@@ -212,18 +204,33 @@ namespace SpaceBlog.Pages.Users
                 .OrderBy(r => r.DisplayName)
                 .ToList();
 
-            // Загружаем текущие роли пользователя
+            // Загружаем текущую роль пользователя (берем первую, если их несколько)
             var currentRoles = await _userManager.GetRolesAsync(EditingUser);
-            SelectedRoleIds = new List<string>();
+            SelectedRoleId = null;
             
-            foreach (var roleName in currentRoles)
+            if (currentRoles.Any())
             {
-                var role = await _roleManager.FindByNameAsync(roleName);
+                var role = await _roleManager.FindByNameAsync(currentRoles.First());
                 if (role != null)
                 {
-                    SelectedRoleIds.Add(role.Id);
+                    SelectedRoleId = role.Id;
                 }
             }
+        }
+
+        private async Task LoadRolesAsync()
+        {
+            // Загружаем только доступные роли (без перезаписи SelectedRoleIds)
+            var roles = await _roleManager.Roles.ToListAsync();
+            AvailableRoles = roles
+                .Select(r => new RoleViewModel
+                {
+                    Id = r.Id,
+                    Name = r.Name ?? "",
+                    DisplayName = GetRoleDisplayName(r.Name ?? "")
+                })
+                .OrderBy(r => r.DisplayName)
+                .ToList();
         }
 
         private static string GetRoleDisplayName(string roleName)

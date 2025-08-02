@@ -25,23 +25,34 @@
                         {
                             <div class="mb-4">
                                 <label class="form-label fw-bold text-muted mb-3">
-                                    <i class="fas fa-user-shield me-2"></i>Выберите роли для пользователя:
+                                    <i class="fas fa-user-shield me-2"></i>Выберите роль для пользователя:
                                 </label>
                                 <div class="row">
                                     @for (int i = 0; i < Model.AvailableRoles.Count; i++)
                                     {
                                         <div class="col-lg-4 col-md-6 col-sm-12 mb-2">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" 
-                                                       name="SelectedRoleIds" value="@Model.AvailableRoles[i].Id" 
+                                                <input class="form-check-input" type="radio" 
+                                                       name="SelectedRoleId" value="@Model.AvailableRoles[i].Id" 
                                                        id="role_@Model.AvailableRoles[i].Id"
-                                                       checked="@Model.SelectedRoleIds.Contains(Model.AvailableRoles[i].Id)" />
+                                                       checked="@(Model.SelectedRoleId == Model.AvailableRoles[i].Id)" />
                                                 <label class="form-check-label" for="role_@Model.AvailableRoles[i].Id">
                                                     @Model.AvailableRoles[i].DisplayName
                                                 </label>
                                             </div>
                                         </div>
                                     }
+                                </div>
+                                <div class="mt-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" 
+                                               name="SelectedRoleId" value="" 
+                                               id="role_none"
+                                               checked="@(string.IsNullOrEmpty(Model.SelectedRoleId))" />
+                                        <label class="form-check-label" for="role_none">
+                                            <em class="text-muted">Без роли</em>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         }

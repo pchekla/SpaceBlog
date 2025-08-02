@@ -204,8 +204,7 @@
         function confirmDelete(articleId, articleTitle) {
             document.getElementById('articleIdToDelete').value = articleId;
             document.getElementById('articleTitleToDelete').textContent = articleTitle;
-            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-            deleteModal.show();
+            $('#deleteModal').modal('show');
         }
     </script>
     
