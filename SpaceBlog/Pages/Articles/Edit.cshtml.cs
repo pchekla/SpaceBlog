@@ -126,7 +126,7 @@ namespace SpaceBlog.Pages.Articles
                 return Forbid();
             }
 
-            await LoadDataAsync();
+            await LoadTagsAsync();
 
             if (!ModelState.IsValid)
             {
@@ -165,7 +165,7 @@ namespace SpaceBlog.Pages.Articles
                 _logger.LogInformation($"Статья '{Article.Title}' (ID: {Article.Id}) обновлена пользователем {currentUser.DisplayName}");
 
                 StatusMessage = $"Статья \"{Article.Title}\" успешно обновлена!";
-                return RedirectToPage("./Index");
+                return RedirectToPage("./Details", new { id = Article.Id });
             }
             catch (Exception ex)
             {
@@ -187,6 +187,19 @@ namespace SpaceBlog.Pages.Articles
                 .ToListAsync();
 
             // Загружаем выбранные теги
+            SelectedTagIds = Article.ArticleTags
+                .Select(at => at.TagId)
+                .ToList();
+        }
+
+        private async Task LoadTagsAsync()
+        {
+            // Загружаем только доступные теги (без перезаписи Input данных)
+            AvailableTags = await _context.Tags
+                .OrderBy(t => t.Name)
+                .ToListAsync();
+
+            // Загружаем выбранные теги из текущей статьи
             SelectedTagIds = Article.ArticleTags
                 .Select(at => at.TagId)
                 .ToList();

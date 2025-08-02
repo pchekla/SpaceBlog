@@ -33,7 +33,7 @@
                                         <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-2">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" 
-                                                       asp-for="SelectedTagIds" value="@Model.AvailableTags[i].Id" 
+                                                       name="SelectedTagIds" value="@Model.AvailableTags[i].Id" 
                                                        id="tag_@Model.AvailableTags[i].Id"
                                                        checked="@Model.SelectedTagIds.Contains(Model.AvailableTags[i].Id)" />
                                                 <label class="form-check-label" for="tag_@Model.AvailableTags[i].Id">
@@ -43,7 +43,6 @@
                                         </div>
                                     }
                                 </div>
-                                <span asp-validation-for="SelectedTagIds" class="text-danger"></span>
                             </div>
                         }
                         
