@@ -138,7 +138,11 @@
                                                     @if (Model.CanDeleteArticle(article.AuthorId))
                                                     {
                                                         <button type="button" class="btn btn-outline-danger btn-sm" 
-                                                                onclick="confirmDelete('@article.Id', '@article.Title')">
+                                                                data-bs-toggle="modal" 
+                                                                data-bs-target="#deleteModal"
+                                                                data-article-id="@article.Id"
+                                                                data-article-title="@article.Title"
+                                                                onclick="prepareDeleteModal(this)">
                                                             <i class="fas fa-trash me-1"></i>Удалить
                                                         </button>
                                                     }
@@ -171,7 +175,7 @@
 </div>
 
 <!-- Модальное окно для удаления статьи -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -201,29 +205,71 @@
 
 @section Scripts {
     <script>
-        function confirmDelete(articleId, articleTitle) {
+        function prepareDeleteModal(button) {
+            // Защита от двойного клика
+            if (button.disabled) return;
+            
+            // Принудительная очистка перед открытием
+            cleanupModal();
+            
+            const articleId = button.getAttribute('data-article-id');
+            const articleTitle = button.getAttribute('data-article-title');
+            
             document.getElementById('articleIdToDelete').value = articleId;
             document.getElementById('articleTitleToDelete').textContent = articleTitle;
             
-            const modal = new bootstrap.Modal(document.getElementById('deleteModal'), {
-                backdrop: true,
-                keyboard: true
-            });
-            modal.show();
+            console.log('Модальное окно удаления подготовлено для статьи:', articleTitle);
         }
-        
-        // Обработчик для закрытия модального окна
+
+        // Обработчик для корректного закрытия модального окна
         document.addEventListener('DOMContentLoaded', function() {
             const deleteModal = document.getElementById('deleteModal');
             if (deleteModal) {
+                // Принудительная очистка при загрузке страницы
+                cleanupModal();
+                
                 deleteModal.addEventListener('hidden.bs.modal', function () {
-                    // Убираем backdrop если он остался
-                    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
-                    document.body.classList.remove('modal-open');
-                    document.body.style.removeProperty('padding-right');
+                    cleanupModal();
+                });
+                
+                // Дополнительная очистка при показе модального окна
+                deleteModal.addEventListener('show.bs.modal', function () {
+                    cleanupModal();
+                });
+                
+                // Обработчик ошибок модального окна
+                deleteModal.addEventListener('hide.bs.modal', function () {
+                    setTimeout(cleanupModal, 100);
                 });
             }
         });
+        
+        // Функция для принудительной очистки модального окна
+        function cleanupModal() {
+            // Убираем все backdrop'ы
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+                backdrop.remove();
+            });
+            
+            // Очищаем классы и стили с body
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('padding-right');
+            document.body.style.removeProperty('overflow');
+            document.body.style.removeProperty('padding-left');
+            
+            // Восстанавливаем прокрутку
+            document.documentElement.style.removeProperty('overflow');
+        }
+        
+        // Аварийная кнопка для разблокировки интерфейса (можно вызвать из консоли)
+        function emergencyUnlock() {
+            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+            cleanupModal();
+            console.log('Интерфейс разблокирован принудительно');
+        }
     </script>
     
     <style>

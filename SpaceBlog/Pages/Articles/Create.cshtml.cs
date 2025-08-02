@@ -113,8 +113,8 @@ namespace SpaceBlog.Pages.Articles
 
                 StatusMessage = $"Статья \"{article.Title}\" успешно создана!";
                 
-                // Перенаправляем на список статей
-                return RedirectToPage("./Index");
+                // Перенаправляем на список всех статей (доступен всем пользователям)
+                return RedirectToPage("/Articles/All");
             }
             catch (Exception ex)
             {
