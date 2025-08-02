@@ -6,6 +6,8 @@
         404 => "Страница не найдена",
         403 => "Доступ запрещен", 
         500 => "Внутренняя ошибка сервера",
+        401 => "Требуется авторизация",
+        400 => "Неправильный запрос",
         _ => "Ошибка"
     };
 }
@@ -29,6 +31,45 @@
         <script>
             window.location.href = '/Error/500';
         </script>
+        break;
+    case 401:
+        <!-- Перенаправляем на страницу авторизации -->
+        <script>
+            window.location.href = '/Identity/Account/Login';
+        </script>
+        break;
+    case 400:
+        <!-- Показываем красивую страницу для Bad Request -->
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card shadow border-0">
+                        <div class="card-header bg-warning text-dark text-center">
+                            <h1 class="mb-0">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Ошибка 400
+                            </h1>
+                        </div>
+                        <div class="card-body text-center p-4">
+                            <h3 class="text-warning mb-3">Неправильный запрос</h3>
+                            <p class="text-muted mb-4">
+                                Ваш запрос содержит неправильные данные или параметры.
+                                Пожалуйста, проверьте введенную информацию и попробуйте снова.
+                            </p>
+                            
+                            <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                                <a asp-page="/Index" class="btn btn-primary">
+                                    <i class="fas fa-home me-2"></i>На главную
+                                </a>
+                                <button onclick="history.back()" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Назад
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         break;
     default:
         <!-- Показываем общую ошибку -->
