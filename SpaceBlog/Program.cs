@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SpaceBlog.Data;
 using SpaceBlog.Models;
+using SpaceBlog.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -114,6 +115,10 @@ builder.Services.AddAntiforgery(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+
+// Глобальный обработчик исключений - работает во всех окружениях
+app.UseGlobalExceptionHandler();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
@@ -126,6 +131,7 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
+    // В production дополнительно используем встроенный обработчик как fallback
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
