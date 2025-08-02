@@ -192,37 +192,45 @@
                         <div id="modalUserName" class="text-muted"></div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Выберите роли:</label>
+                        <label class="form-label fw-bold">Выберите роль:</label>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="@Role.Names.Administrator" 
-                                   id="roleAdmin" name="selectedRoles">
+                            <input class="form-check-input" type="radio" value="@Role.Names.Administrator" 
+                                   id="roleAdmin" name="selectedRole">
                             <label class="form-check-label" for="roleAdmin">
                                 <i class="fas fa-crown text-warning me-2"></i>Администратор
                                 <small class="text-muted d-block">Полный доступ к системе</small>
                             </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="@Role.Names.Moderator" 
-                                   id="roleModerator" name="selectedRoles">
+                            <input class="form-check-input" type="radio" value="@Role.Names.Moderator" 
+                                   id="roleModerator" name="selectedRole">
                             <label class="form-check-label" for="roleModerator">
                                 <i class="fas fa-shield-alt text-success me-2"></i>Модератор
                                 <small class="text-muted d-block">Модерация контента</small>
                             </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="@Role.Names.Author" 
-                                   id="roleAuthor" name="selectedRoles">
+                            <input class="form-check-input" type="radio" value="@Role.Names.Author" 
+                                   id="roleAuthor" name="selectedRole">
                             <label class="form-check-label" for="roleAuthor">
                                 <i class="fas fa-pen text-info me-2"></i>Автор
                                 <small class="text-muted d-block">Создание и редактирование статей</small>
                             </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" value="@Role.Names.User" 
-                                   id="roleUser" name="selectedRoles">
+                            <input class="form-check-input" type="radio" value="@Role.Names.User" 
+                                   id="roleUser" name="selectedRole">
                             <label class="form-check-label" for="roleUser">
                                 <i class="fas fa-user text-secondary me-2"></i>Пользователь
                                 <small class="text-muted d-block">Базовые права</small>
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" value="" 
+                                   id="roleNone" name="selectedRole">
+                            <label class="form-check-label" for="roleNone">
+                                <i class="fas fa-minus text-muted me-2"></i><em class="text-muted">Без роли</em>
+                                <small class="text-muted d-block">Убрать все роли</small>
                             </label>
                         </div>
                     </div>
@@ -246,21 +254,31 @@
             document.getElementById('modalUserId').value = userId;
             document.getElementById('modalUserName').textContent = userName;
             
-            // Очищаем все чекбоксы
-            document.querySelectorAll('input[name="selectedRoles"]').forEach(cb => cb.checked = false);
+            // Очищаем все radio buttons
+            document.querySelectorAll('input[name="selectedRole"]').forEach(rb => rb.checked = false);
             
-            // Отмечаем текущие роли
-            if (currentRoles) {
+            // Отмечаем текущую роль (берем первую, если их несколько)
+            if (currentRoles && currentRoles.trim()) {
                 const roles = currentRoles.split(',');
-                roles.forEach(role => {
-                    const checkbox = document.querySelector(`input[value="${role.trim()}"]`);
-                    if (checkbox) {
-                        checkbox.checked = true;
-                    }
-                });
+                const currentRole = roles[0].trim();
+                const radioButton = document.querySelector(`input[value="${currentRole}"]`);
+                if (radioButton) {
+                    radioButton.checked = true;
+                } else {
+                    // Если роль не найдена, выбираем "Без роли"
+                    document.getElementById('roleNone').checked = true;
+                }
+            } else {
+                // Если нет ролей, выбираем "Без роли"
+                document.getElementById('roleNone').checked = true;
             }
             
-            $('#roleModal').modal('show');
+            // Используем Bootstrap 5 способ показа модального окна
+            const modal = new bootstrap.Modal(document.getElementById('roleModal'), {
+                backdrop: 'static',
+                keyboard: false
+            });
+            modal.show();
         }
     </script>
     

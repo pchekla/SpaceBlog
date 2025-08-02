@@ -113,7 +113,7 @@ namespace SpaceBlog.Pages.Admin
             }
         }
 
-        public async Task<IActionResult> OnPostChangeRolesAsync(string userId, List<string> selectedRoles)
+        public async Task<IActionResult> OnPostChangeRolesAsync(string userId, string selectedRole)
         {
             try
             {
@@ -138,28 +138,23 @@ namespace SpaceBlog.Pages.Admin
                     }
                 }
 
-                // Добавляем новые роли
-                if (selectedRoles?.Any() == true)
+                // Добавляем новую роль
+                if (!string.IsNullOrEmpty(selectedRole) && 
+                    (selectedRole == Role.Names.Administrator || 
+                     selectedRole == Role.Names.Moderator || 
+                     selectedRole == Role.Names.Author || 
+                     selectedRole == Role.Names.User))
                 {
-                    var validRoles = selectedRoles.Where(r => 
-                        r == Role.Names.Administrator || 
-                        r == Role.Names.Moderator || 
-                        r == Role.Names.Author || 
-                        r == Role.Names.User).ToList();
-
-                    if (validRoles.Any())
+                    var addResult = await _userManager.AddToRoleAsync(user, selectedRole);
+                    if (!addResult.Succeeded)
                     {
-                        var addResult = await _userManager.AddToRolesAsync(user, validRoles);
-                        if (!addResult.Succeeded)
-                        {
-                            StatusMessage = "Ошибка при назначении новых ролей.";
-                            return RedirectToPage();
-                        }
+                        StatusMessage = "Ошибка при назначении новой роли.";
+                        return RedirectToPage();
                     }
                 }
 
-                _logger.LogInformation("Роли пользователя {UserId} изменены администратором {AdminId}. Новые роли: {Roles}", 
-                    userId, User.Identity?.Name, string.Join(", ", selectedRoles ?? new List<string>()));
+                _logger.LogInformation("Роль пользователя {UserId} изменена администратором {AdminId}. Новая роль: {Role}", 
+                    userId, User.Identity?.Name, selectedRole ?? "Без роли");
 
                 StatusMessage = $"Роли пользователя {user.GetDisplayName()} успешно обновлены.";
                 return RedirectToPage();

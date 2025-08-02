@@ -204,8 +204,26 @@
         function confirmDelete(articleId, articleTitle) {
             document.getElementById('articleIdToDelete').value = articleId;
             document.getElementById('articleTitleToDelete').textContent = articleTitle;
-            $('#deleteModal').modal('show');
+            
+            const modal = new bootstrap.Modal(document.getElementById('deleteModal'), {
+                backdrop: true,
+                keyboard: true
+            });
+            modal.show();
         }
+        
+        // Обработчик для закрытия модального окна
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteModal = document.getElementById('deleteModal');
+            if (deleteModal) {
+                deleteModal.addEventListener('hidden.bs.modal', function () {
+                    // Убираем backdrop если он остался
+                    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+                    document.body.classList.remove('modal-open');
+                    document.body.style.removeProperty('padding-right');
+                });
+            }
+        });
     </script>
     
     <style>
