@@ -9,6 +9,8 @@ namespace SpaceBlog.Pages
     public class ErrorModel : PageModel
     {
         public string? RequestId { get; set; }
+        public new int? StatusCode { get; set; }
+        public string? OriginalPath { get; set; }
 
         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 
@@ -19,9 +21,16 @@ namespace SpaceBlog.Pages
             _logger = logger;
         }
 
-        public void OnGet()
+        public void OnGet(int? statusCode = null)
         {
             RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+            StatusCode = statusCode ?? HttpContext.Response.StatusCode;
+            OriginalPath = HttpContext.Request.Path + HttpContext.Request.QueryString;
+            
+            _logger.LogWarning("Ошибка {StatusCode} для пути: {Path} - пользователь: {User}", 
+                StatusCode, 
+                OriginalPath,
+                User.Identity?.Name ?? "Anonymous");
         }
     }
 

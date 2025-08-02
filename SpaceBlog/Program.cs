@@ -130,6 +130,9 @@ else
     app.UseHsts();
 }
 
+// Настройка обработки статусных кодов ошибок
+app.UseStatusCodePagesWithReExecute("/Error/{0}");
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 

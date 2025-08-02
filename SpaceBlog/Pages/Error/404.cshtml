@@ -5,122 +5,83 @@
     Layout = "_Layout";
 }
 
+<!-- Анимированный фон с частицами -->
+<div id="particles-bg" class="position-fixed w-100 h-100" style="top: 0; left: 0; z-index: -1;"></div>
+
 <div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center" 
-     style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+     style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); position: relative;">
     <div class="row w-100 justify-content-center">
-        <div class="col-lg-8 col-md-10 col-12">
-            <div class="card shadow-lg border-0">
-                <div class="card-body text-center p-5">
-                    <!-- Космическая иллюстрация -->
-                    <div class="space-scene mb-4">
+        <div class="col-lg-6 col-md-8 col-sm-10 col-12">
+            <div class="card shadow-lg border-0 error-card">
+                <div class="card-body text-center p-4">
+                    <!-- Улучшенная космическая иллюстрация -->
+                    <div class="space-scene mb-3">
                         <div class="astronaut">
-                            <i class="fas fa-rocket text-primary" style="font-size: 4rem;"></i>
+                            <i class="fas fa-user-astronaut text-primary" style="font-size: 3rem;"></i>
                         </div>
                         <div class="planets">
                             <i class="fas fa-circle text-warning planet-1"></i>
                             <i class="fas fa-circle text-info planet-2"></i>
                             <i class="fas fa-circle text-success planet-3"></i>
+                            <i class="fas fa-star text-light star-1"></i>
+                            <i class="fas fa-star text-light star-2"></i>
+                            <i class="fas fa-star text-light star-3"></i>
+                            <i class="fas fa-star text-light star-4"></i>
+                            <i class="fas fa-star text-light star-5"></i>
                         </div>
                     </div>
                     
                     <!-- Заголовок -->
-                    <h1 class="display-1 fw-bold text-primary mb-3" style="font-size: 8rem;">404</h1>
-                    <h2 class="h2 mb-4 text-dark">Упс! Страница потерялась в космосе</h2>
+                    <h1 class="display-1 fw-bold text-primary mb-2" style="font-size: 5rem;">404</h1>
+                    <h2 class="h4 mb-3 text-dark">Упс! Страница потерялась в космосе</h2>
                     
                     <!-- Описание -->
-                    <div class="alert alert-light border-start border-primary border-4 mb-4">
-                        <p class="mb-2 fw-semibold">Запрашиваемая страница не найдена</p>
-                        <p class="mb-0 text-muted">
+                    <div class="alert alert-light border-start border-primary border-4 mb-3">
+                        <p class="mb-1 fw-semibold">Запрашиваемая страница не найдена</p>
+                        <p class="mb-0 text-muted small">
                             Возможно, страница была перемещена, удалена или вы ввели неправильный адрес
                         </p>
                     </div>
 
                     @if (!string.IsNullOrEmpty(Model.RequestedUrl))
                     {
-                        <div class="alert alert-info">
+                        <div class="alert alert-info small mb-3">
                             <i class="fas fa-link me-2"></i>
                             Запрошенный адрес: <code>@Model.RequestedUrl</code>
                         </div>
                     }
                     
-                    <!-- Поиск -->
-                    <div class="card bg-light mb-4">
-                        <div class="card-body">
-                            <h6 class="card-title">
-                                <i class="fas fa-search me-2"></i>Попробуйте найти то, что искали:
-                            </h6>
-                            <form method="get" asp-page="/Search" class="d-flex">
-                                <input type="text" name="query" class="form-control me-2" 
-                                       placeholder="Поиск по статьям, тегам, пользователям...">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                            </form>
-                        </div>
+                    <!-- Основные действия -->
+                    <div class="d-flex flex-column flex-sm-row gap-2 justify-content-center mb-3">
+                        <a asp-page="/Index" class="btn btn-primary">
+                            <i class="fas fa-home me-2"></i>Вернуться домой
+                        </a>
+                        <button onclick="history.back()" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Назад
+                        </button>
                     </div>
                     
                     <!-- Быстрые ссылки -->
-                    <div class="row mb-4">
-                        <div class="col-md-4 mb-3">
-                            <div class="card h-100 quick-link-card">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-newspaper fa-2x text-primary mb-2"></i>
-                                    <h6>Статьи</h6>
-                                    <a asp-page="/Articles/All" class="btn btn-outline-primary btn-sm">
-                                        Читать статьи
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="card h-100 quick-link-card">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-users fa-2x text-success mb-2"></i>
-                                    <h6>Сообщество</h6>
-                                    <a asp-page="/Users/All" class="btn btn-outline-success btn-sm">
-                                        Пользователи
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="card h-100 quick-link-card">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-tags fa-2x text-info mb-2"></i>
-                                    <h6>Темы</h6>
-                                    <a asp-page="/Tags/All" class="btn btn-outline-info btn-sm">
-                                        Теги
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Основные действия -->
-                    <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
-                        <a asp-page="/Index" class="btn btn-primary btn-lg">
-                            <i class="fas fa-home me-2"></i>Вернуться домой
+                    <div class="d-flex flex-wrap justify-content-center gap-3 mb-3">
+                        <a asp-page="/Articles/All" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-newspaper me-1"></i>Статьи
                         </a>
-                        <button onclick="history.back()" class="btn btn-outline-secondary btn-lg">
-                            <i class="fas fa-arrow-left me-2"></i>Назад
-                        </button>
-                        <button onclick="location.reload()" class="btn btn-outline-info btn-lg">
-                            <i class="fas fa-redo me-2"></i>Обновить
-                        </button>
+                        <a asp-page="/Users/All" class="btn btn-outline-success btn-sm">
+                            <i class="fas fa-users me-1"></i>Пользователи
+                        </a>
+                        <a asp-page="/Tags/All" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-tags me-1"></i>Теги
+                        </a>
                     </div>
                     
                     <!-- Дополнительная помощь -->
-                    <div class="mt-5 pt-4 border-top">
-                        <p class="text-muted mb-3">
-                            <i class="fas fa-lightbulb me-2"></i>
-                            Если проблема повторяется, свяжитесь с администрацией
-                        </p>
-                        <div class="d-flex flex-wrap justify-content-center gap-3 small">
-                            <span class="text-muted">
+                    <div class="mt-3 pt-3 border-top">
+                        <div class="d-flex flex-wrap justify-content-center gap-3 small text-muted">
+                            <span>
                                 <i class="fas fa-clock me-1"></i>
                                 @DateTime.Now.ToString("dd.MM.yyyy HH:mm")
                             </span>
-                            <span class="text-muted">
+                            <span>
                                 <i class="fas fa-code me-1"></i>
                                 Ошибка 404
                             </span>
@@ -134,15 +95,41 @@
 
 @section Scripts {
     <style>
-        /* Космическая анимация */
+        /* Основная карточка ошибки */
+        .error-card {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: cardAppear 1s ease-out;
+        }
+        
+        @@keyframes cardAppear {
+            0% {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        /* Улучшенная космическая анимация */
         .space-scene {
             position: relative;
-            height: 150px;
-            margin: 2rem 0;
+            height: 120px;
+            margin: 1rem 0;
+            overflow: hidden;
         }
         
         .astronaut {
             animation: float 3s ease-in-out infinite;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .astronaut:hover {
+            transform: scale(1.1) rotate(10deg);
         }
         
         .planets {
@@ -178,6 +165,47 @@
             animation: orbit 15s linear infinite;
         }
         
+        /* Анимация звёзд */
+        .star-1 {
+            position: absolute;
+            top: 10%;
+            left: 80%;
+            font-size: 0.8rem;
+            animation: twinkle 2s ease-in-out infinite;
+        }
+        
+        .star-2 {
+            position: absolute;
+            top: 30%;
+            left: 10%;
+            font-size: 0.6rem;
+            animation: twinkle 2.5s ease-in-out infinite 0.5s;
+        }
+        
+        .star-3 {
+            position: absolute;
+            top: 70%;
+            left: 85%;
+            font-size: 0.4rem;
+            animation: twinkle 3s ease-in-out infinite 1s;
+        }
+        
+        .star-4 {
+            position: absolute;
+            top: 80%;
+            left: 15%;
+            font-size: 0.7rem;
+            animation: twinkle 2.2s ease-in-out infinite 1.5s;
+        }
+        
+        .star-5 {
+            position: absolute;
+            top: 50%;
+            left: 90%;
+            font-size: 0.5rem;
+            animation: twinkle 2.8s ease-in-out infinite 0.8s;
+        }
+        
         @@keyframes float {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-20px); }
@@ -186,6 +214,17 @@
         @@keyframes orbit {
             0% { transform: rotate(0deg) translateX(30px) rotate(0deg); }
             100% { transform: rotate(360deg) translateX(30px) rotate(-360deg); }
+        }
+        
+        @@keyframes twinkle {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
         }
         
         /* Карточки быстрых ссылок */
@@ -216,19 +255,23 @@
         /* Адаптивность */
         @@media (max-width: 768px) {
             .display-1 {
-                font-size: 5rem !important;
+                font-size: 3.5rem !important;
             }
             
             .space-scene {
-                height: 100px;
+                height: 80px;
             }
             
             .astronaut i {
-                font-size: 2.5rem !important;
+                font-size: 2rem !important;
             }
             
             .card-body {
-                padding: 2rem !important;
+                padding: 1.5rem !important;
+            }
+            
+            .col-lg-6 {
+                padding: 0 1rem;
             }
         }
         
@@ -237,10 +280,126 @@
                 flex-direction: column !important;
             }
             
-            .btn-lg {
-                font-size: 1rem;
-                padding: 0.75rem 1rem;
+            .display-1 {
+                font-size: 2.5rem !important;
+            }
+            
+            .card-body {
+                padding: 1rem !important;
+            }
+            
+            .space-scene {
+                height: 60px;
+            }
+            
+            .astronaut i {
+                font-size: 1.5rem !important;
             }
         }
     </style>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Создаем анимированный фон с частицами
+            createParticleBackground();
+            
+            // Добавляем интерактивность к астронавту
+            const astronaut = document.querySelector('.astronaut');
+            if (astronaut) {
+                astronaut.addEventListener('click', function() {
+                    this.style.animation = 'none';
+                    setTimeout(() => {
+                        this.style.animation = 'float 3s ease-in-out infinite, spin 1s ease-in-out';
+                    }, 10);
+                    
+                    setTimeout(() => {
+                        this.style.animation = 'float 3s ease-in-out infinite';
+                    }, 1000);
+                });
+            }
+            
+            // Добавляем эффект параллакса для карточки
+            document.addEventListener('mousemove', function(e) {
+                const card = document.querySelector('.error-card');
+                if (card) {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left - rect.width / 2;
+                    const y = e.clientY - rect.top - rect.height / 2;
+                    
+                    const rotateX = (y / rect.height) * 10;
+                    const rotateY = (x / rect.width) * -10;
+                    
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                }
+            });
+            
+            document.addEventListener('mouseleave', function() {
+                const card = document.querySelector('.error-card');
+                if (card) {
+                    card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+                }
+            });
+        });
+        
+        function createParticleBackground() {
+            const particleContainer = document.getElementById('particles-bg');
+            if (!particleContainer) return;
+            
+            // Создаем 50 частиц
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Случайные свойства для каждой частицы
+                const size = Math.random() * 4 + 1;
+                const duration = Math.random() * 20 + 10;
+                const delay = Math.random() * 20;
+                const startX = Math.random() * 100;
+                const startY = Math.random() * 100;
+                
+                particle.style.cssText = `
+                    position: absolute;
+                    width: ${size}px;
+                    height: ${size}px;
+                    background: rgba(255, 255, 255, 0.6);
+                    border-radius: 50%;
+                    left: ${startX}%;
+                    top: ${startY}%;
+                    animation: particleFloat ${duration}s linear infinite;
+                    animation-delay: ${delay}s;
+                    pointer-events: none;
+                `;
+                
+                particleContainer.appendChild(particle);
+            }
+            
+            // Добавляем CSS анимацию для частиц
+            const style = document.createElement('style');
+            style.textContent = `
+                @@keyframes particleFloat {
+                    0% {
+                        transform: translateY(100vh) rotate(0deg);
+                        opacity: 0;
+                    }
+                    10% {
+                        opacity: 1;
+                    }
+                    90% {
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translateY(-100px) rotate(360deg);
+                        opacity: 0;
+                    }
+                }
+                
+                @@keyframes spin {
+                    0% { transform: rotate(0deg) scale(1); }
+                    50% { transform: rotate(180deg) scale(1.2); }
+                    100% { transform: rotate(360deg) scale(1); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    </script>
 }
