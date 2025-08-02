@@ -106,7 +106,7 @@ namespace SpaceBlog.Pages.Tags
                 _logger.LogInformation($"Тег '{Tag.Name}' (ID: {Tag.Id}) обновлен");
 
                 StatusMessage = $"Тег \"{Tag.Name}\" успешно обновлен!";
-                return RedirectToPage("./Index");
+                return RedirectToPage("./My");
             }
             catch (Exception ex)
             {

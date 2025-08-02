@@ -87,8 +87,8 @@ namespace SpaceBlog.Pages.Tags
 
                 StatusMessage = $"Тег \"{tag.Name}\" успешно создан!";
                 
-                // Перенаправляем на список тегов
-                return RedirectToPage("./Index");
+                // Перенаправляем на мои теги
+                return RedirectToPage("./My");
             }
             catch (Exception ex)
             {
