@@ -7,7 +7,7 @@ using SpaceBlog.Models;
 
 namespace SpaceBlog.Pages.Articles
 {
-    [Authorize] // Требуется авторизация для управления статьями
+    [Authorize(Policy = "RequireModerator")] // Требуется роль модератора или администратора
     public class IndexModel : PageModel
     {
         private readonly ApplicationDbContext _context;

@@ -99,6 +99,12 @@
                                 </a></li>
                                 @if (User.Identity?.IsAuthenticated == true)
                                 {
+                                    <li><a class="dropdown-item" asp-page="/Articles/My">
+                                        <i class="fas fa-user-edit me-2"></i>Мои статьи
+                                    </a></li>
+                                }
+                                @if (User.IsInRole(SpaceBlog.Models.Role.Names.Administrator) || User.IsInRole(SpaceBlog.Models.Role.Names.Moderator))
+                                {
                                     <li><a class="dropdown-item" asp-page="/Articles/Index">
                                         <i class="fas fa-cog me-2"></i>Управление статьями
                                     </a></li>
