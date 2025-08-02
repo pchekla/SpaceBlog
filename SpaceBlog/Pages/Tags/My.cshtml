@@ -1,0 +1,120 @@
+@page
+@model SpaceBlog.Pages.Tags.MyModel
+@{
+    ViewData["Title"] = "Мои теги";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Заголовок -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 text-primary mb-1">
+                        <i class="fas fa-tags me-2"></i>Мои теги
+                    </h1>
+                    <p class="text-muted mb-0">Теги, которые вы создали</p>
+                </div>
+                <a asp-page="./Create" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>Добавить тег
+                </a>
+            </div>
+
+            <!-- Статистика -->
+            <div class="row mb-4">
+                <div class="col-md-4 col-sm-6 mb-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-tags fa-2x text-primary mb-2"></i>
+                            <h4 class="mb-1">@Model.MyTags.Count()</h4>
+                            <small class="text-muted">Мои теги</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6 mb-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-eye fa-2x text-success mb-2"></i>
+                            <h4 class="mb-1">@Model.MyTags.Count(t => t.IsActive)</h4>
+                            <small class="text-muted">Активные</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6 mb-3">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-newspaper fa-2x text-info mb-2"></i>
+                            <h4 class="mb-1">@Model.MyTags.Sum(t => t.ArticleTags.Count)</h4>
+                            <small class="text-muted">Использований</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Список тегов -->
+            @if (Model.MyTags.Any())
+            {
+                <div class="row">
+                    @foreach (var tag in Model.MyTags.OrderByDescending(t => t.CreatedAt))
+                    {
+                        <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h5 class="card-title mb-1">
+                                            <span class="badge" style="background-color: @tag.Color; color: white;">
+                                                @if (!string.IsNullOrEmpty(tag.Icon))
+                                                {
+                                                    <i class="fas fa-@tag.Icon me-1"></i>
+                                                }
+                                                @tag.Name
+                                            </span>
+                                        </h5>
+                                        <span class="badge @(tag.IsActive ? "bg-success" : "bg-secondary")">
+                                            @(tag.IsActive ? "Активен" : "Неактивен")
+                                        </span>
+                                    </div>
+                                    
+                                    @if (!string.IsNullOrEmpty(tag.Description))
+                                    {
+                                        <p class="card-text text-muted small mb-2">@tag.Description</p>
+                                    }
+                                    
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar me-1"></i>@tag.CreatedAt.ToString("dd.MM.yyyy")
+                                        </small>
+                                        <small class="text-muted">
+                                            <i class="fas fa-newspaper me-1"></i>@tag.ArticleTags.Count статей
+                                        </small>
+                                    </div>
+                                    
+                                    <!-- Действия -->
+                                    <div class="d-flex gap-2">
+                                        <a asp-page="./Details" asp-route-id="@tag.Id" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye me-1"></i>Просмотр
+                                        </a>
+                                        <a asp-page="./Edit" asp-route-id="@tag.Id" class="btn btn-sm btn-outline-warning">
+                                            <i class="fas fa-edit me-1"></i>Редактировать
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-tags fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted mb-3">У вас пока нет тегов</h4>
+                    <p class="text-muted mb-4">Создайте свой первый тег для организации контента!</p>
+                    <a asp-page="./Create" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus me-2"></i>Создать первый тег
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

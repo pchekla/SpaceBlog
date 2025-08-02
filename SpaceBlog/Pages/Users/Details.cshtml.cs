@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SpaceBlog.Data;
@@ -7,6 +8,7 @@ using SpaceBlog.Models;
 
 namespace SpaceBlog.Pages.Users
 {
+    [Authorize] // Требуется аутентификация для просмотра деталей пользователя
     public class DetailsModel : PageModel
     {
         private readonly ApplicationDbContext _context;

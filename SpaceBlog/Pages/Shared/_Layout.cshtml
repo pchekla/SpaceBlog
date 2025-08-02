@@ -127,6 +127,12 @@
                                 <li><a class="dropdown-item" asp-page="/Tags/All">
                                     <i class="fas fa-list me-2"></i>Все теги
                                 </a></li>
+                                @if (User.Identity?.IsAuthenticated == true)
+                                {
+                                    <li><a class="dropdown-item" asp-page="/Tags/My">
+                                        <i class="fas fa-user-tag me-2"></i>Мои теги
+                                    </a></li>
+                                }
                                 @if (User.IsInRole(SpaceBlog.Models.Role.Names.Administrator) || User.IsInRole(SpaceBlog.Models.Role.Names.Moderator))
                                 {
                                     <li><a class="dropdown-item" asp-page="/Tags/Index">

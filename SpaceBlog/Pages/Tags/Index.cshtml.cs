@@ -7,7 +7,7 @@ using SpaceBlog.Models;
 
 namespace SpaceBlog.Pages.Tags
 {
-    [Authorize] // Требуется авторизация для управления тегами
+    [Authorize(Policy = "RequireModerator")] // Требуется роль модератора или администратора для управления тегами
     public class IndexModel : PageModel
     {
         private readonly ApplicationDbContext _context;

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SpaceBlog.Data;
 using SpaceBlog.Models;
@@ -12,11 +13,13 @@ namespace SpaceBlog.Pages.Tags
     public class CreateModel : PageModel
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<BlogUser> _userManager;
         private readonly ILogger<CreateModel> _logger;
 
-        public CreateModel(ApplicationDbContext context, ILogger<CreateModel> logger)
+        public CreateModel(ApplicationDbContext context, UserManager<BlogUser> userManager, ILogger<CreateModel> logger)
         {
             _context = context;
+            _userManager = userManager;
             _logger = logger;
         }
 
@@ -58,12 +61,24 @@ namespace SpaceBlog.Pages.Tags
                     return Page();
                 }
 
+                // Получаем текущего пользователя
+                var currentUser = await _userManager.GetUserAsync(User);
+                
                 // Создаем новый тег
                 var tag = new Tag
                 {
                     Name = Input.Name.Trim(),
-                    CreatedAt = DateTime.Now
+                    Description = null,
+                    Color = "#6c757d",
+                    CreatedAt = DateTime.Now,
+                    CreatedById = currentUser?.Id,
+                    IsActive = true,
+                    SortOrder = 0,
+                    ViewCount = 0
                 };
+                
+                // Генерируем slug
+                tag.Slug = tag.GenerateSlug();
 
                 _context.Tags.Add(tag);
                 await _context.SaveChangesAsync();

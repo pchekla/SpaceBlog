@@ -18,14 +18,13 @@
 
                 <div class="card-body p-4">
                     <form method="post">
+                        @Html.AntiForgeryToken()
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
                         
                         <!-- Название -->
-                        <div class="form-floating mb-4">
-                            <input asp-for="Input.Name" class="form-control" autocomplete="off" aria-required="true" placeholder="Введите название тега" />
-                            <label asp-for="Input.Name" class="text-muted">
-                                <i class="fas fa-tag me-1"></i>Название
-                            </label>
+                        <div class="mb-4">
+                            <label for="Input_Name" class="form-label">Название</label>
+                            <input name="Input.Name" id="Input_Name" class="form-control" type="text" value="@Model.Input.Name" autocomplete="off" required />
                             <span asp-validation-for="Input.Name" class="text-danger"></span>
                         </div>
                         
