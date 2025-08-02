@@ -80,7 +80,7 @@ SpaceBlog - это полнофункциональная платформа д�
 
 1. **Клонирование репозитория**
    ```bash
-   git clone https://github.com/your-username/SpaceBlog.git
+   git clone https://github.com/pchekla/SpaceBlog.git
    cd SpaceBlog
    ```
 
@@ -273,8 +273,8 @@ dotnet clean && dotnet build
 
 Если у вас есть вопросы или проблемы:
 
-- 🐛 [Создайте Issue](https://github.com/your-username/SpaceBlog/issues)
-- 💬 [Обсуждения](https://github.com/your-username/SpaceBlog/discussions)
+- 🐛 [Создайте Issue](https://github.com/pchekla/SpaceBlog/issues)
+- 💬 [Обсуждения](https://github.com/pchekla/SpaceBlog/discussions)
 - 📧 Email: support@spaceBlog.com
 
 ---
